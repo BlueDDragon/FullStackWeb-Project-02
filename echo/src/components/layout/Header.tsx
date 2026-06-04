@@ -1,0 +1,46 @@
+'use client';
+
+import styles from "./Header.module.css"
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+
+export default function Header() {
+    const [isHeaderOpen, setIsHeaderOpen] = useState(true);
+
+    return (
+        <div className={`${styles.container} ${isHeaderOpen ? styles.open : styles.close}`}>
+            <Link className={styles.link_logo} href={`/`}>
+                <Image src={`/images/logo_mini.png`} width={30} height={30} alt="logo"/>
+                <p>ECHO</p>
+            </Link>
+            {isHeaderOpen ? 
+            <button className={styles.btn_collapse} onClick={() => setIsHeaderOpen(false)}>
+                <Image src={`/images/icon_arrow_left.png`} width={20} height={20} alt="arrow_left"/>
+            </button> : 
+            <button className={styles.btn_expand} onClick={() => setIsHeaderOpen(true)}>    
+                <Image src={`/images/icon_arrow_right.png`} width={20} height={20} alt="arrow_right"/>
+            </button>}
+            <Link className={styles.link_home} href={`/`}>
+                <Image src={`/images/icon_home.png`} width={30} height={30} alt="home"/>
+                <p>홈</p>
+            </Link>
+            <Link className={styles.link_profile} href={`/`}>
+                <Image src={`/images/icon_profile.png`} width={30} height={30} alt="profile"/>
+                <p>프로필</p>
+            </Link>
+            <Link className={styles.link_bookmark} href={`/`}>
+                <Image src={`/images/icon_bookmark.png`} width={30} height={30} alt="bookmark"/>
+                <p>북마크</p>
+            </Link>
+            <Link className={styles.link_chat} href={`/`}>
+                <Image src={`/images/icon_chat.png`} width={30} height={30} alt="chat"/>
+                <p>채팅</p>
+            </Link>
+            <Link className={styles.link_setting} href={`/`}>
+                <Image src={`/images/icon_setting.png`} width={30} height={30} alt="setting"/>
+                <p>설정</p>
+            </Link>
+        </div>
+    );
+}

@@ -1,0 +1,216 @@
+/* 헤더 */
+.container {
+    position: sticky;
+    top: 0;
+
+    height: 100vh;
+
+    padding: 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    background-color: #ffffff;
+    border-right: 1px solid #eff3f4;
+
+    transition:
+        width 0.25s ease,
+        padding 0.25s ease;
+}
+
+/* 펼침 상태 */
+.open {
+    width: 280px;
+}
+
+/* 접힘 상태 */
+.close {
+    width: 80px;
+}
+
+/* 로고 */
+.link_logo {
+    height: 56px;
+
+    margin: 0 8px;
+    margin-bottom: 12px;
+    padding: 0 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    border-radius: 16px;
+
+    text-decoration: none;
+
+    transition: background-color 0.2s ease;
+}
+
+/* 로고 호버 */
+.link_logo:hover {
+    background-color: #f7f9f9;
+}
+
+/* 로고 텍스트 */
+.link_logo p {
+    color: #0A6BFB;
+
+    font-size: 1.6rem;
+    font-weight: 900;
+
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+}
+
+/* 메뉴 링크 공통 */
+.link_home,
+.link_profile,
+.link_bookmark,
+.link_chat,
+.link_setting {
+    position: relative;
+    height: 56px;
+
+    padding: 0 16px;
+    margin: 0 8px;
+
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    border-radius: 16px;
+
+    text-decoration: none;
+
+    overflow: hidden;
+
+    transition: background-color 0.2s ease;
+}
+
+/* 메뉴 호버 */
+.link_home:hover,
+.link_profile:hover,
+.link_bookmark:hover,
+.link_chat:hover,
+.link_setting:hover {
+    background-color: #f7f9f9;
+}
+
+/* 메뉴 텍스트 */
+.link_home p,
+.link_profile p,
+.link_bookmark p,
+.link_chat p,
+.link_setting p {
+    font-size: 1rem;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+/* 토글 버튼 */
+.btn_collapse,
+.btn_expand {
+    position: absolute;
+    top: 14px;
+    right: -24px;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #eff3f4;
+    border-radius: 50%;
+
+    background-color: #ffffff;
+
+    cursor: pointer;
+
+    z-index: 10;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* 토글 버튼 호버 */
+.btn_collapse:hover,
+.btn_expand:hover {
+    background-color: #f7f9f9;
+
+    color: #0A6BFB;
+
+    transform: scale(1.05);
+}
+
+/* 메뉴 아이콘 */
+.link_home img,
+.link_profile img,
+.link_bookmark img,
+.link_chat img,
+.link_setting img {
+    min-width: 30px;
+
+    flex-shrink: 0;
+}
+
+/* 메뉴 텍스트 */
+.link_logo p,
+.link_home p,
+.link_profile p,
+.link_bookmark p,
+.link_chat p,
+.link_setting p {
+    white-space: nowrap;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+/* 열림 */
+.open .link_logo p,
+.open .link_home p,
+.open .link_profile p,
+.open .link_bookmark p,
+.open .link_chat p,
+.open .link_setting p {
+    opacity: 1;
+
+    transform: translateX(0);
+}
+
+/* 닫힘 */
+.close .link_logo p,
+.close .link_home p,
+.close .link_profile p,
+.close .link_bookmark p,
+.close .link_chat p,
+.close .link_setting p {
+    opacity: 0;
+
+    transform: translateX(-8px);
+
+    pointer-events: none;
+}
+
+/* 접힘 상태 텍스트 애니메이션 */
+.open p {
+    opacity: 1;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.close p {
+    opacity: 0;
+
+    transform: translateX(-8px);
+}

@@ -1,0 +1,162 @@
+/* 게시글 */
+.container {
+    padding: 16px 20px;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+
+    border-bottom: 1px solid #eff3f4;
+
+    transition: background-color 0.2s ease;
+}
+
+/* 게시글 호버 */
+.container:hover {
+    background-color: #f7f9f9;
+}
+
+/* 작성자 영역 */
+.box_post {
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 닉네임 */
+.nickname {
+    color: #0f1419;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+/* 아이디 */
+.id {
+    color: #536471;
+
+    font-size: 0.95rem;
+}
+
+/* 작성 시간 */
+.createAt {
+    color: #536471;
+
+    font-size: 0.95rem;
+}
+
+/* 삭제 버튼 */
+.btn_del {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #536471;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+/* 삭제 버튼 호버 */
+.btn_del:hover {
+    background-color: rgba(244, 33, 46, 0.1);
+
+    color: #f4212e;
+}
+
+/* 내용 영역 */
+.box_content {
+    width: 100%;
+
+    margin-top: 8px;
+}
+
+/* 게시글 내용 */
+.content {
+    color: #0f1419;
+
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+/* 하단 영역 */
+.box_bottom {
+    width: 100%;
+
+    margin-top: 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* 공통 액션 버튼 */
+.box_bottom button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 10px;
+
+    border: none;
+    border-radius: 999px;
+
+    background-color: transparent;
+
+    color: #536471;
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+/* 숫자 */
+.box_bottom button span {
+    font-size: 0.85rem;
+}
+
+/* 댓글 */
+.comment:hover {
+    background-color: rgba(10, 107, 251, 0.08);
+
+    color: #0A6BFB;
+}
+
+/* 좋아요 */
+.like:hover {
+    background-color: rgba(249, 24, 128, 0.08);
+
+    color: #f91880;
+}
+
+/* 북마크 */
+.bookmark:hover {
+    background-color: rgba(10, 107, 251, 0.08);
+
+    color: #0A6BFB;
+}
