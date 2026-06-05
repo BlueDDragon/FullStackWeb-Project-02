@@ -2,32 +2,32 @@
     "posts": [
         {
             "index": 0,
-            "id": "hong1234",
+            "originIndex": -1,
+            "userId": "hong1234",
             "nickname": "홍길동",
             "content": "똥쌈",
             "state": "POST",
             "createAt": "2026-06-04",
-            "amendAt": "",
             "deleteAt": ""
         },
         {
             "index": 1,
-            "id": "lee5678",
+            "originIndex": -1,
+            "userId": "lee5678",
             "nickname": "이영희",
             "content": "집에 가고 싶다",
             "state": "POST",
             "createAt": "2026-06-04",
-            "amendAt": "",
             "deleteAt": ""
         },
         {
             "index": 2,
-            "id": "kim0000",
+            "originIndex": -1,
+            "userId": "kim0000",
             "nickname": "김철수",
             "content": "옵치노잼망겜",
             "state": "POST",
             "createAt": "2026-06-04",
-            "amendAt": "",
             "deleteAt": ""
         }
     ]

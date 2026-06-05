@@ -21,7 +21,7 @@
 
 /* 펼침 상태 */
 .open {
-    width: 280px;
+    width: 180px;
 }
 
 /* 접힘 상태 */
@@ -62,6 +62,10 @@
 
     letter-spacing: -0.04em;
     white-space: nowrap;
+    
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
 }
 
 /* 메뉴 링크 공통 */
@@ -113,19 +117,20 @@
 /* 토글 버튼 */
 .btn_collapse,
 .btn_expand {
-    position: absolute;
-    top: 14px;
-    right: -24px;
+    position: relative;
+    height: 56px;
 
-    width: 48px;
-    height: 48px;
+    padding: 0 16px;
+    margin: 0 8px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border: 1px solid #eff3f4;
-    border-radius: 50%;
+    border: none;
+    border-radius: 16px;
+
+    text-decoration: none;
 
     background-color: #ffffff;
 
@@ -161,13 +166,14 @@
 }
 
 /* 메뉴 텍스트 */
-.link_logo p,
 .link_home p,
 .link_profile p,
 .link_bookmark p,
 .link_chat p,
 .link_setting p {
     white-space: nowrap;
+
+    color: #000000;
 
     transition:
         opacity 0.15s ease,

@@ -10,7 +10,7 @@ export default function HomePostItem({ post }: HomePostItemProps) {
         <div className={styles.container}>
             <div className={styles.box_post}>
                 <p className={styles.nickname}>{post.nickname}</p>
-                <p className={styles.id}>@{post.id}</p>
+                <p className={styles.id}>@{post.userId}</p>
                 <span> · </span>
                 <p className={styles.createAt}>{post.createAt}</p>
             </div>

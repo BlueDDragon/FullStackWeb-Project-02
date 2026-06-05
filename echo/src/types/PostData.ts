@@ -1,11 +1,12 @@
 export type PostData = {
     index: number;
-    id: string;
+    originIndex: number;
+
+    userId: string;
     nickname: string;
     content: string;
 
-    state: "POST" | "DEL" | "ERROR";
+    state: "POST" | "NOTE" | "DEL" | "ERROR";
     createAt: string;
-    amendAt: string;
     deleteAt: string;
 }
