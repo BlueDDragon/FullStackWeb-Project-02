@@ -10,6 +10,12 @@ export default function Header() {
     const pathName = usePathname().split('/');
     const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
+    const isLinkHome = pathName[1] === "";
+    const isLinkProfile = pathName[2] === "profile";
+    const isLinkBookmark = pathName[2] === "bookmark";
+    const isLinkChat = pathName[2] === "chat";
+    const isLinkSetting = pathName[1] === "setting";
+
     return (
         <div className={`${styles.container} ${isHeaderOpen ? styles.open : styles.close}`}>
             <Link className={styles.link_logo} href={`/`}>
@@ -18,23 +24,23 @@ export default function Header() {
             </Link>
             
             <Link className={styles.link_home} href={`/`}>
-                <Image src={`/images/icon_home_${pathName[1] === ""? "open" : "close"}.png`} width={30} height={30} alt="home"/>
+                <Image src={`/images/icon_home_${isLinkHome? "open" : "close"}.png`} width={30} height={30} alt="home"/>
                 <p>홈</p>
             </Link>
-            <Link className={styles.link_profile} href={`/profile`}>
-                <Image src={`/images/icon_profile_${pathName[1] === "profile"? "open" : "close"}.png`} width={30} height={30} alt="profile"/>
+            <Link className={styles.link_profile} href={`/0/profile`}>
+                <Image src={`/images/icon_profile_${isLinkProfile? "open" : "close"}.png`} width={30} height={30} alt="profile"/>
                 <p>프로필</p>
             </Link>
-            <Link className={styles.link_bookmark} href={`/bookmark`}>
-                <Image src={`/images/icon_bookmark_${pathName[1] === "bookmark"? "open" : "close"}.png`} width={30} height={30} alt="bookmark"/>
+            <Link className={styles.link_bookmark} href={`/0/bookmark`}>
+                <Image src={`/images/icon_bookmark_${isLinkBookmark? "open" : "close"}.png`} width={30} height={30} alt="bookmark"/>
                 <p>북마크</p>
             </Link>
-            <Link className={styles.link_chat} href={`/chat`}>
-                <Image src={`/images/icon_chat_${pathName[1] === "chat"? "open" : "close"}.png`} width={30} height={30} alt="chat"/>
+            <Link className={styles.link_chat} href={`/0/chat`}>
+                <Image src={`/images/icon_chat_${isLinkChat? "open" : "close"}.png`} width={30} height={30} alt="chat"/>
                 <p>채팅</p>
             </Link>
             <Link className={styles.link_setting} href={`/setting`}>
-                <Image src={`/images/icon_setting_${pathName[1] === "setting"? "open" : "close"}.png`} width={30} height={30} alt="setting"/>
+                <Image src={`/images/icon_setting_${isLinkSetting? "open" : "close"}.png`} width={30} height={30} alt="setting"/>
                 <p>설정</p>
             </Link>
             

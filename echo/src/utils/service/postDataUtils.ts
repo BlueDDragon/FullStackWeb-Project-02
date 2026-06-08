@@ -2,30 +2,31 @@ import { PostData } from "@/types/PostData";
 import { loadData, saveData } from "../storage/storage";
 import { PostStorage } from "@/types/StorageData";
 
-export function getPostData() {
+export function getPostStorage() {
     return loadData<PostStorage>({ type: "Post" });
 }
 
 export function addPost(content: string) {
-    const postData = getPostData();
-    const isEmpty = (!postData || !Array.isArray(postData) || postData.length <= 0);
+    const postStorage = getPostStorage();
+    const isEmpty = (!postStorage || !Array.isArray(postStorage.posts) || postStorage.posts.length <= 0);
 
-    const newCreateAt = String(Date.now());
+    const newCreateAt = Date.now();
 
     const newPost: PostData = {
-        index: (isEmpty ? 0 : postData.nextIndex),
-        originIndex: -1,
+        postIdx: (postStorage.nextIndex || 0),
+        rootPostIdx: -1,
+        parentPostIdx: -1,
         userId: "",
         nickname: "익명",
         content: content,
         state: "POST",
         createAt: newCreateAt,
-        deleteAt: ""
+        deleteAt: 0,
     }
 
     const newPostStorage: PostStorage = {
-        posts: isEmpty ? [newPost] : [...postData.posts, newPost],
-        nextIndex: postData.nextIndex + 1,
+        posts: isEmpty ? [newPost] : [...postStorage.posts, newPost],
+        nextIndex: (postStorage.nextIndex || 0) + 1,
         updateAt: newCreateAt,
     }
 

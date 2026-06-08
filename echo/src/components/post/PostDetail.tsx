@@ -1,15 +1,15 @@
 'use client';
 
-import styles from "./HomePostItem.module.css"
+import styles from "./PostDetail.module.css"
 import { useCallback } from "react";
 import { PostData } from "@/types/PostData";
 import { useRouter } from "next/navigation";
 
-type HomePostItemProps = {
+type PostDetailProps = {
     post: PostData;
 }
 
-export default function HomePostItem({ post }: HomePostItemProps) {
+export default function PostDetail({ post }: PostDetailProps) {
     const router = useRouter();
 
     const handlePostClick = useCallback(() => {
