@@ -8,6 +8,17 @@ const sequelize = new Sequelize({
 });
 
 const User = require("./user")(sequelize);
-// const Post = require("./post")(sequelize);
+const Post = require("./post")(sequelize);
 
-module.exports = { sequelize, User };
+// User 1 <-> N Post
+User.hasMany(Post, { foreignKey: "userId", as: "posts" });
+Post.belongsTo(User, { foreignKey: "userId", as: "author" });
+
+// Post 1 <- Post
+Post.belongsTo(Post, { foreignKey: "rootPostId", as: "rootPost" });
+
+// Post 1 <-> N Post
+Post.belongsTo(Post, { foreignKey: "parentPostId", as: "parentPost" });
+Post.hasMany(Post, { foreignKey: "parentPostId", as: "children" });
+
+module.exports = { sequelize, User, Post };
