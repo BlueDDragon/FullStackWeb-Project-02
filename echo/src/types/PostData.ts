@@ -1,13 +1,19 @@
-export type PostData = {
-    postIdx: number;
-    rootPostIdx: number;
-    parentPostIdx: number;
+export enum PostState {
+    PUBLIC = "PUBLIC",
+    PRIVATE = "PRIVATE",
+    NOTICE = "NOTICE",
+    DELETED = "DELETED",
+    ERROR = "ERROR",
+}
 
-    userId: string;
-    nickname: string;
+export interface PostData {
+    id: number;
+    rootPostId: number;
+    parentPostId: number;
+    state: PostState;
     content: string;
-
-    state: "POST" | "NOTE" | "DEL" | "ERROR";
-    createAt: number;
-    deleteAt: number;
+    like: number;
+    bookmarks: number;
+    createdAt: string;
+    updatedAt: string;
 }

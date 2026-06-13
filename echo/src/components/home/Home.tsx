@@ -4,8 +4,13 @@ import { HomePostContext } from "@/context/HomePostContext";
 import HomePost from "./HomePost";
 import HomePostList from "./HomePostList";
 import { useHomePostContextAction } from "@/hooks/contetxt/useHomePostContext";
+import { PostGetResponse } from "@/types/ResponseData";
 
-export default function Home() {
+type HomeProps = {
+    response: PostGetResponse;
+}
+
+export default function Home({ response }: HomeProps) {
     const { postStorage, isPostEmpty, updatePostStorage } = useHomePostContextAction();
 
     return (
@@ -13,7 +18,7 @@ export default function Home() {
             <h1>Echo</h1>
             <HomePostContext.Provider value={{ postStorage, isPostEmpty, updatePostStorage }}>
                 <HomePost/>
-                <HomePostList/>
+                <HomePostList response={response}/>
             </HomePostContext.Provider>
         </div>
     );

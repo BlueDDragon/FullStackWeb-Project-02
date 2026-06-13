@@ -1,6 +1,6 @@
 import { PostData } from "./PostData"
 
-export type PostStorage = {
+export interface PostStorage {
     posts: PostData[];
     
     nextIndex: number;

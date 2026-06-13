@@ -4,16 +4,23 @@ import mock_homepost from "@/mocks/mock_homepost.json"
 import HomePostItem from "./HomePostItem";
 import { useContext } from "react";
 import { HomePostContext } from "@/context/HomePostContext";
+import { PostGetResponse } from "@/types/ResponseData";
 
-export default function HomePostList() {
+type HomePostProps = {
+    response: PostGetResponse;
+}
+
+export default function HomePostList({ response }: HomePostProps) {
     // const temp_homepost = [...mock_homepost.posts];
-    const { postStorage, isPostEmpty } = useContext(HomePostContext);
+    // const { postStorage, isPostEmpty } = useContext(HomePostContext);
+
+    const isPostEmpty = !(response?.items.length > 0);
 
     return (
         <div>
             {!isPostEmpty && 
-            postStorage?.posts.sort((a, b) => a.createAt < b.createAt? 1 : -1)
-                .map((post) => <HomePostItem key={post.postIdx} post={post}/>)}
+            response?.items.sort((a, b) => a.createdAt < b.createdAt? 1 : -1)
+                .map((post) => <HomePostItem key={post.id} post={post}/>)}
         </div>
     );
 }

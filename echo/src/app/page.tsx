@@ -1,10 +1,13 @@
+import { fetchPostGetResponse } from "@/utils/api/fetchPost";
 import styles from "./page.module.css";
 import Home from "@/components/home/Home";
 
-export default function Page() {
+export default async function Page() {
+    const response = await fetchPostGetResponse();
+
     return (
         <div>
-            <Home/>
+            <Home response={response}/>
         </div>
     );
 }

@@ -13,7 +13,7 @@ export default function PostDetailChild({ post }: PostDetailChildProps) {
     const router = useRouter();
 
     const handlePostClick = useCallback(() => {
-        router.push(`/0/post/${post.postIdx}`);
+        router.push(`/0/post/${post.id}`);
     }, []);
 
     return (
@@ -21,10 +21,12 @@ export default function PostDetailChild({ post }: PostDetailChildProps) {
             <p> </p>
             <div className={styles.container} onClick={handlePostClick}>
                 <div className={styles.box_post}>
-                    <p className={styles.nickname}>{post.nickname}</p>
-                    <p className={styles.id}>@{post.userId}</p>
+                    {/* <p className={styles.nickname}>{post.nickname}</p> */}
+                    {/* <p className={styles.id}>@{post.userId}</p> */}
+                    <p className={styles.nickname}>익명</p>
+                    <p className={styles.id}>@___DDragon1231</p>
                     <span> · </span>
-                    <p className={styles.createAt}>{post.createAt}</p>
+                    <p className={styles.createAt}>{post.createdAt}</p>
                 </div>
                 <button className={styles.btn_del}>...</button>
                 <div className={styles.box_content}>
