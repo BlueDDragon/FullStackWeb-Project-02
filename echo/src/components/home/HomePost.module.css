@@ -6,17 +6,19 @@
     flex-direction: column;
 
     background-color: #ffffff;
-    border-bottom: 1px solid #eff3f4;
+    border-bottom: 1px solid rgba(102, 180, 175, 0.15);
 }
 
 /* 제목 */
 .subtitle {
     padding: 16px 20px;
 
+    color: #1F2937;
+
     font-size: 1.25rem;
     font-weight: 700;
 
-    border-bottom: 1px solid #eff3f4;
+    border-bottom: 1px solid rgba(102, 180, 175, 0.15);
 }
 
 /* 입력 영역 */
@@ -40,6 +42,8 @@
     border: none;
     outline: none;
 
+    color: #1F2937;
+
     font-size: 1.25rem;
     font-weight: 400;
     line-height: 1.5;
@@ -49,14 +53,14 @@
 
 /* 플레이스홀더 */
 .box_input textarea::placeholder {
-    color: #536471;
+    color: #6B7280;
 }
 
 /* 글자수 */
 .box_input p {
     align-self: flex-end;
 
-    color: #536471;
+    color: #6B7280;
 
     font-size: 0.875rem;
     font-weight: 500;
@@ -70,7 +74,7 @@
     align-items: center;
     justify-content: space-between;
 
-    border-top: 1px solid #eff3f4;
+    border-top: 1px solid rgba(102, 180, 175, 0.15);
 }
 
 /* 기타 버튼 묶음 */
@@ -89,19 +93,23 @@
 
     background-color: transparent;
 
-    color: #0A6BFB;
+    color: #66B4AF;
 
     font-size: 0.95rem;
     font-weight: 600;
 
     cursor: pointer;
 
-    transition: background-color 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
 /* 기능 버튼 호버 */
 .etc_box button:hover {
-    background-color: rgba(10, 107, 251, 0.08);
+    background-color: rgba(102, 180, 175, 0.08);
+
+    color: #5AA39E;
 }
 
 /* 등록 버튼 */
@@ -112,7 +120,7 @@
     border: none;
     border-radius: 999px;
 
-    background-color: #0A6BFB;
+    background-color: #66B4AF;
 
     color: #ffffff;
 
@@ -121,10 +129,17 @@
 
     cursor: pointer;
 
-    transition: opacity 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 /* 등록 버튼 호버 */
 .btn_submit:hover {
-    opacity: 0.9;
+    background-color: #5AA39E;
+}
+
+/* 등록 버튼 클릭 */
+.btn_submit:active {
+    transform: scale(0.98);
 }

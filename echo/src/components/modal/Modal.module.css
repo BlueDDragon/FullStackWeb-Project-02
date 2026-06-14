@@ -14,6 +14,8 @@
 
 /* 모달 */
 .box_modal {
+    position: relative;
+
     width: 100%;
     max-width: 420px;
 
@@ -24,6 +26,8 @@
     gap: 24px;
 
     background-color: #ffffff;
+
+    border: 1px solid rgba(102, 180, 175, 0.15);
     border-radius: 24px;
 
     box-shadow:
@@ -31,33 +35,113 @@
         0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* 안내 문구 */
+/* 제목 */
 .notice {
-    color: #0f1419;
+    color: #1F2937;
 
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 700;
 
     text-align: center;
 }
 
-/* 버튼 영역 */
-.box_btn {
+/* 닫기 버튼 */
+.btn_close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background-color: transparent;
+
+    color: #6B7280;
+
+    font-size: 1.5rem;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+/* 닫기 버튼 호버 */
+.btn_close:hover {
+    background-color: rgba(102, 180, 175, 0.08);
+
+    color: #66B4AF;
+}
+
+/* 세로 버튼 영역 */
+.box_btn_vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 가로 버튼 영역 */
+.box_btn_horizontal {
     display: flex;
     gap: 12px;
 }
 
-/* 로그인 버튼 */
-.btn_click {
-    flex: 1;
+/* 아이디 입력 */
+.input_id,
+.input_password {
+    width: 80%;
     height: 48px;
 
-    border: none;
+    padding: 0 16px;
+
+    box-sizing: border-box;
+    align-self: center;
+
+    border: 1px solid rgba(102, 180, 175, 0.2);
+    border-radius: 12px;
+
+    outline: none;
+
+    background-color: #ffffff;
+
+    color: #1F2937;
+
+    font-size: 1rem;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* 입력 포커스 */
+.input_id:focus,
+.input_password:focus {
+    border-color: #66B4AF;
+
+    box-shadow: 0 0 0 3px rgba(102, 180, 175, 0.15);
+}
+
+/* 플레이스홀더 */
+.input_id::placeholder,
+.input_password::placeholder {
+    color: #9CA3AF;
+}
+
+/* 공통 버튼 */
+.btn_yes,
+.btn_no {
+    height: 48px;
+
     border-radius: 999px;
-
-    background-color: #0A6BFB;
-
-    color: #ffffff;
 
     font-size: 1rem;
     font-weight: 700;
@@ -66,47 +150,82 @@
 
     transition:
         background-color 0.2s ease,
-        transform 0.2s ease;
+        border-color 0.2s ease,
+        transform 0.15s ease;
 }
 
-/* 로그인 버튼 호버 */
-.btn_click:hover {
-    background-color: #0959d1;
+/* 로그인 폼에서 사용 */
+.box_btn_vertical .btn_yes,
+.box_btn_vertical .btn_no {
+    width: 60%;
+    align-self: center;
 }
 
-/* 로그인 버튼 클릭 */
-.btn_click:active {
-    transform: scale(0.98);
+/* 확인/로그인 모달에서 사용 */
+.box_btn_horizontal .btn_yes,
+.box_btn_horizontal .btn_no {
+    flex: 1;
 }
 
 /* 확인 버튼 */
-.btn_close {
-    flex: 1;
-    height: 48px;
-
-    border: 1px solid #d7dbdf;
-    border-radius: 999px;
+.btn_no {
+    border: 1px solid rgba(102, 180, 175, 0.2);
 
     background-color: #ffffff;
 
-    color: #0f1419;
+    color: #1F2937;
+}
 
-    font-size: 1rem;
+/* 확인 버튼 호버 */
+.btn_no:hover {
+    background-color: rgba(102, 180, 175, 0.08);
+
+    border-color: #66B4AF;
+}
+
+/* 메인 버튼 */
+.btn_yes {
+    border: none;
+
+    background-color: #66B4AF;
+
+    color: #ffffff;
+}
+
+/* 메인 버튼 호버 */
+.btn_yes:hover {
+    background-color: #5AA39E;
+}
+
+/* 버튼 클릭 */
+.btn_yes:active,
+.btn_no:active {
+    transform: scale(0.98);
+}
+
+/* 회원가입 링크 버튼 */
+.btn_link {
+    align-self: center;
+
+    border: none;
+
+    background: none;
+
+    color: #66B4AF;
+
+    font-size: 0.95rem;
     font-weight: 600;
 
     cursor: pointer;
 
     transition:
-        background-color 0.2s ease,
-        transform 0.2s ease;
+        color 0.2s ease,
+        opacity 0.2s ease;
 }
 
-/* 확인 버튼 호버 */
-.btn_close:hover {
-    background-color: #f7f9f9;
-}
+/* 회원가입 링크 호버 */
+.btn_link:hover {
+    color: #5AA39E;
 
-/* 확인 버튼 클릭 */
-.btn_close:active {
-    transform: scale(0.98);
+    text-decoration: underline;
 }

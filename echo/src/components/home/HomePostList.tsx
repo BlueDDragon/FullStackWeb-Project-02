@@ -1,10 +1,10 @@
 'use client';
 
 import mock_homepost from "@/mocks/mock_homepost.json"
-import HomePostItem from "./HomePostItem";
 import { useContext } from "react";
 import { HomePostContext } from "@/context/HomePostContext";
 import { PostGetResponse } from "@/types/ResponseData";
+import PostDetail from "../post/PostDetail";
 
 type HomePostProps = {
     response: PostGetResponse;
@@ -20,7 +20,7 @@ export default function HomePostList({ response }: HomePostProps) {
         <div>
             {!isPostEmpty && 
             response?.items.sort((a, b) => a.createdAt < b.createdAt? 1 : -1)
-                .map((post) => <HomePostItem key={post.id} post={post}/>)}
+                .map((post) => <PostDetail key={post.id} post={post} isFocus={true}/>)}
         </div>
     );
 }

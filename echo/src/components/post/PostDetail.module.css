@@ -5,16 +5,17 @@
 
 /* 게시글 */
 .container {
+    position: relative;
+
     padding: 16px 20px;
 
     display: flex;
-    flex-wrap: wrap;
     align-items: flex-start;
-    flex: 1;
-    
-    cursor: pointer;
+    gap: 12px;
 
     border-bottom: 1px solid #eff3f4;
+
+    cursor: pointer;
 
     transition: background-color 0.2s ease;
 }
@@ -24,13 +25,63 @@
     background-color: #f7f9f9;
 }
 
-/* 작성자 영역 */
+/* 프로필 영역 */
+.box_profile {
+    position: relative;
+
+    width: 40px;
+
+    display: flex;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+/* 프로필 이미지 */
+.box_profile img {
+    border-radius: 50%;
+}
+
+/* 스레드 연결선 */
+.thread_line {
+    position: absolute;
+
+    top: 48px;
+    bottom: -120px;
+    left: 50%;
+
+    width: 2px;
+
+    transform: translateX(-50%);
+
+    background-color: #cfd9de;
+}
+
+/* 본문 영역 */
+.box_body {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* 상단 영역 */
+.box_header {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+/* 작성자 정보 */
 .box_post {
     flex: 1;
 
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 /* 닉네임 */

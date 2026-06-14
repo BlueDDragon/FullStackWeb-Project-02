@@ -15,7 +15,6 @@ export default function Home({ response }: HomeProps) {
 
     return (
         <div>
-            <h1>Echo</h1>
             <HomePostContext.Provider value={{ postStorage, isPostEmpty, updatePostStorage }}>
                 <HomePost/>
                 <HomePostList response={response}/>
