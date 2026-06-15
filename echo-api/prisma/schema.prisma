@@ -11,11 +11,14 @@ datasource db {
 }
 
 model User {
-  id              String  @id
+  id              String  @id @default(uuid())
+  userId          String  @unique
   email           String  @unique
   password        String
   username        String
   profileImageUrl String?
+
+  posts Post[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,8 +39,10 @@ model Post {
   state        PostState @default(PUBLIC)
   content      String
   like         Int       @default(0)
-  bookmarks    Int       @default(0)
-  userId       String
+  bookmark     Int       @default(0)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
