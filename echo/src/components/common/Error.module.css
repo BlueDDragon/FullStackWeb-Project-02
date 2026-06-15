@@ -1,0 +1,79 @@
+/* 전체 영역 */
+.container {
+    width: 100%;
+    min-height: 300px;
+
+    padding: 40px 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+
+    text-align: center;
+}
+
+/* 에러 아이콘 */
+.error {
+    width: 72px;
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: rgba(102, 180, 175, 0.12);
+
+    color: #66B4AF;
+
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* 에러 메시지 */
+.info {
+    max-width: 400px;
+
+    color: #1F2937;
+
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+/* 버튼 */
+.btn {
+    min-width: 120px;
+    height: 44px;
+
+    padding: 0 20px;
+
+    border: none;
+    border-radius: 999px;
+
+    background-color: #66B4AF;
+
+    color: #ffffff;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+/* 버튼 호버 */
+.btn:hover {
+    background-color: #5AA39E;
+}
+
+/* 버튼 클릭 */
+.btn:active {
+    transform: scale(0.98);
+}

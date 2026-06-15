@@ -25,10 +25,10 @@ export async function fetchData<T>(url: string, options?: RequestInit) : Promise
 
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error();
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
         const data = await response.json();
-        if (!data || data === null || data === undefined) throw new Error();
+        if (!data || data === null || data === undefined) throw new Error(`Response data is empty`);
 
         return data;
     }
