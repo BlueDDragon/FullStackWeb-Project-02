@@ -18,6 +18,12 @@ async function bootstrap() {
     .build();
   SwaggerModule.setup("docs", app, SwaggerModule.createDocument(app, config));
 
+  // CORS
+  app.enableCors({
+    origin: `http://localhost:${process.env.NEXT_PORT ?? 3000}`,
+    credentials: true,
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 
   console.log(`Start to Server: http://localhost:${process.env.PORT ?? 3000} (swagger: /docs)`);

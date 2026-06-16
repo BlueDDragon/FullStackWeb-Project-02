@@ -10,7 +10,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const isValid = await super.canActivate(context);
-        if (!isValid) return false;
+        if (!isValid) throw new UnauthorizedException();
 
         const req = context.switchToHttp().getRequest();
         const authorization = req.headers.authorization;

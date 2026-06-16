@@ -18,10 +18,29 @@ model User {
   username        String
   profileImageUrl String?
 
-  posts Post[]
+  posts     Post[]
+  bookmarks Bookmark[]
+
+  followers  Follow[] @relation("Follower")
+  followings Follow[] @relation("Following")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Follow {
+  followerId String
+  follower   User   @relation("Follower", fields: [followerId], references: [id])
+
+  followingId String
+  following   User   @relation("Following", fields: [followingId], references: [id])
+
+  isMuted    Boolean @default(false)
+  isFavorite Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@id([followerId, followingId], name: "followId")
 }
 
 enum PostState {
@@ -33,17 +52,39 @@ enum PostState {
 }
 
 model Post {
-  id           Int       @id @default(autoincrement())
-  rootPostId   Int       @default(-1)
-  parentPostId Int       @default(-1)
-  state        PostState @default(PUBLIC)
-  content      String
-  like         Int       @default(0)
-  bookmark     Int       @default(0)
+  id      Int       @id @default(autoincrement())
+  state   PostState @default(PUBLIC)
+  content String
 
-  user   User   @relation(fields: [userId], references: [userId])
+  rootPostId Int?
+  rootPost   Post?  @relation("RootPost", fields: [rootPostId], references: [id])
+  rootOf     Post[] @relation("RootPost")
+
+  parentPostId Int?
+  parentPost   Post?  @relation("ParentPost", fields: [parentPostId], references: [id])
+  replies      Post[] @relation("ParentPost")
+
+  // like         Int       @default(0)
+  // bookmark     Int       @default(0)
+
   userId String
+  user   User   @relation(fields: [userId], references: [userId])
+
+  // likes Post[] @relation("Likes")
+  // bookmarks Bookmark[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Bookmark {
+  name       String
+  isFavorite Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [userId])
+
+  // posts Post[]
+
+  @@id([userId, name], name: "bookmarkId")
 }

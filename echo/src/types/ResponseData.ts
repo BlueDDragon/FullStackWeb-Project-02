@@ -16,3 +16,23 @@ export interface PostDetailResponse {
     post: PostData;
     posts: PostData[];
 }
+
+export interface AuthLoginResponse {
+    login: boolean;
+    accessToken: string;
+    user: {
+        sub: string;
+        userId: string;
+        username: string;
+    }
+}
+
+export interface AuthMeResponse {
+    login: boolean;
+    user: {
+        userId: string;
+        username: string;
+        profileImageUrl: string;
+        createdAt: string;
+    }
+}

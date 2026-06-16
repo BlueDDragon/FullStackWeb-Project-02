@@ -9,19 +9,19 @@ import { AUTH_MESSAGES } from '../messages/auth.messages';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const exitUserId = await this.prisma.user.findUnique({ where: { userId: createUserDto.userId }});
-    if (exitUserId) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_ID, createUserDto.userId);
+  // async create(createUserDto: CreateUserDto) {
+  //   const exitUserId = await this.prisma.user.findUnique({ where: { userId: createUserDto.userId }});
+  //   if (exitUserId) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_ID, createUserDto.userId);
     
-    const exitEmail = await this.prisma.user.findUnique({ where: { email: createUserDto.email }});
-    if (exitEmail) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_EMAIL, createUserDto.email);
+  //   const exitEmail = await this.prisma.user.findUnique({ where: { email: createUserDto.email }});
+  //   if (exitEmail) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_EMAIL, createUserDto.email);
 
-    const passwordHash = await bcrypt.hash(createUserDto.password, Number(process.env.BCRYPT_ROUND) || 10);
-    const data = { ...createUserDto, password: passwordHash };
-    const { password, ...result } = await this.prisma.user.create({ data: data });
+  //   const passwordHash = await bcrypt.hash(createUserDto.password, Number(process.env.BCRYPT_ROUND) || 10);
+  //   const data = { ...createUserDto, password: passwordHash };
+  //   const { password, ...result } = await this.prisma.user.create({ data: data });
 
-    return { messages: AUTH_MESSAGES.SUCCESS.REGISTER, user: result };
-  }
+  //   return { messages: AUTH_MESSAGES.SUCCESS.REGISTER, user: result };
+  // }
 
   async findAll() {
     const users = await this.prisma.user.findMany();

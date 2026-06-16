@@ -5,20 +5,27 @@ import { MeAuthDto } from './dto/me-auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthRequest } from './interfaces/auth-request.interface';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { RegisterAuthDto } from './dto/register-auth.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('register')
+  @ApiOperation({ summary: "회원가입" })
+  register(@Body() registerAuthDto: RegisterAuthDto) {
+    return this.authService.register(registerAuthDto);
+  }
+
   @Post('login')
-  @ApiOperation({ summary: "사용자 로그인" })
+  @ApiOperation({ summary: "로그인" })
   login(@Body() loginAuthDto: LoginAuthDto) {
     return this.authService.login(loginAuthDto);
   }
 
   @Post('logout') 
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: "사용자 로그아웃" })
+  @ApiOperation({ summary: "로그아웃" })
   logout(@Req() req: AuthRequest) {
     const authorization = req.headers.authorization;
     if (!authorization || !authorization.startsWith('Bearer ')) throw new UnauthorizedException();
@@ -32,7 +39,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "현재 사용자 로그인 정보 호출" })
+  @ApiOperation({ summary: "현재 로그인 상태 호출" })
   me(@Req() req: AuthRequest) {
     return this.authService.me(req.user);
   }

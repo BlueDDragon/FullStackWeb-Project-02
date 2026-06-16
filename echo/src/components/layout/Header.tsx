@@ -27,7 +27,7 @@ export default function Header() {
                 <Image src={`/images/icon_home_${isLinkHome? "open" : "close"}.png`} width={30} height={30} alt="home"/>
                 <p>홈</p>
             </Link>
-            <Link className={styles.link_profile} href={`/0/profile`}>
+            <Link className={styles.link_profile} href={`/profile/0`}>
                 <Image src={`/images/icon_profile_${isLinkProfile? "open" : "close"}.png`} width={30} height={30} alt="profile"/>
                 <p>프로필</p>
             </Link>
