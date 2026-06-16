@@ -30,7 +30,7 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(userPayLoad);
-    return { accessToken, user: { ...userPayLoad }};
+    return { messages: AUTH_MESSAGES.SUCCESS.LOGIN, login: true, accessToken, user: { ...userPayLoad }};
   }
 
   async logout(userPayLoad: JwtPayload, token: string) {
@@ -39,7 +39,7 @@ export class AuthService {
     // const ttl = decoded.exp - now;
     // if (ttl > 0) await this.redis.set(`blacklist:${token}`, userPayLoad.userId, ttl);
 
-    return { logout: true, user: {...userPayLoad}};
+    return { messages: AUTH_MESSAGES.SUCCESS.LOGOUT, logout: true, user: {...userPayLoad}};
   }
 
   async me(userPayLoad: JwtPayload) {
@@ -49,6 +49,6 @@ export class AuthService {
     });
     if (!user) throw new UnauthorizedException();
 
-    return user;
+    return { messages: AUTH_MESSAGES.SUCCESS.ME, login: true, user };
   }
 }

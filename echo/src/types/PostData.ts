@@ -13,7 +13,10 @@ export interface PostData {
     state: PostState;
     content: string;
     like: number;
-    bookmarks: number;
+    bookmark: number;
+
+    userId: string;
+
     createdAt: string;
     updatedAt: string;
 }

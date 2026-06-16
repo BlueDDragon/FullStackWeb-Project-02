@@ -23,3 +23,9 @@ async function bootstrap() {
   console.log(`Start to Server: http://localhost:${process.env.PORT ?? 3000} (swagger: /docs)`);
 }
 bootstrap();
+
+// npm i
+// class-validator class-transformer dotenv
+// @prisma/client@6
+// -D prisma@6
+// @nestjs/swagger

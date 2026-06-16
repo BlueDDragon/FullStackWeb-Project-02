@@ -1,11 +1,11 @@
-import { fetchPostGetResponse } from "@/utils/api/fetchPost";
+import { fetchPostFindAllResponse } from "@/utils/api/fetchPost";
 import styles from "./page.module.css";
 import Home from "@/components/home/Home";
 import ErrorPage from "@/components/common/Error";
 
 export default async function Page() {
     try {
-        const response = await fetchPostGetResponse();
+        const response = await fetchPostFindAllResponse();
 
         return (
             <div>

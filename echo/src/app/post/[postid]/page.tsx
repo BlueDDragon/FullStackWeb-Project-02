@@ -1,11 +1,11 @@
 import Post from "@/components/post/Post";
-import { fetchPostGetResponse } from "@/utils/api/fetchPost";
+import { fetchPostDetailResponse } from "@/utils/api/fetchPost";
 
 export default async function Page({ params }: { params: Promise<{ postid: string }>}) {
     const { postid } = await params;
 
     try {
-        const response = await fetchPostGetResponse();
+        const response = await fetchPostDetailResponse(Number(postid));
         if (!response) throw new Error(`response is null`);
 
         return (

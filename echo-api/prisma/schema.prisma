@@ -41,7 +41,7 @@ model Post {
   like         Int       @default(0)
   bookmark     Int       @default(0)
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [userId])
   userId String
 
   createdAt DateTime @default(now())
