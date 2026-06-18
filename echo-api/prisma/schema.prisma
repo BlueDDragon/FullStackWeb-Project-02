@@ -11,15 +11,17 @@ datasource db {
 }
 
 model User {
-  id              String  @id @default(uuid())
-  userId          String  @unique
-  email           String  @unique
-  password        String
-  username        String
-  profileImageUrl String?
+  id            String @id @default(uuid())
+  email         String @unique
+  password      String
+  username      String @unique
+  displayName   String
+  profileImgUrl String
+  headerImgUrl  String
 
-  posts     Post[]
-  bookmarks Bookmark[]
+  posts   Post[]
+  likes   PostLike[]
+  folders BookmarkFolder[]
 
   followers  Follow[] @relation("Follower")
   followings Follow[] @relation("Following")
@@ -46,6 +48,7 @@ model Follow {
 enum PostState {
   PUBLIC
   PRIVATE
+  FAVORITE
   NOTICE
   DELETED
   ERROR
@@ -56,35 +59,58 @@ model Post {
   state   PostState @default(PUBLIC)
   content String
 
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
   rootPostId Int?
   rootPost   Post?  @relation("RootPost", fields: [rootPostId], references: [id])
   rootOf     Post[] @relation("RootPost")
 
   parentPostId Int?
-  parentPost   Post?  @relation("ParentPost", fields: [parentPostId], references: [id])
+  parentPost   Post?  @relation("ParentPost", fields: [rootPostId], references: [id])
   replies      Post[] @relation("ParentPost")
 
-  // like         Int       @default(0)
-  // bookmark     Int       @default(0)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [userId])
-
-  // likes Post[] @relation("Likes")
-  // bookmarks Bookmark[]
+  images    PostImage[]
+  likes     PostLike[]
+  bookmarks Bookmark[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Bookmark {
-  name       String
-  isFavorite Boolean @default(false)
+model PostImage {
+  id     String @id @default(uuid())
+  imgUrl String
+
+  postId Int
+  post   Post @relation(fields: [postId], references: [id])
+}
+
+model PostLike {
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  postId Int
+  post   Post   @relation(fields: [postId], references: [id])
+
+  @@id([userId, postId], name: "likeId")
+}
+
+model BookmarkFolder {
+  id          String @id @default(uuid())
+  name        String
+  description String
 
   userId String
-  user   User   @relation(fields: [userId], references: [userId])
+  user   User   @relation(fields: [userId], references: [id])
 
-  // posts Post[]
+  bookmarks Bookmark[]
+}
 
-  @@id([userId, name], name: "bookmarkId")
+model Bookmark {
+  folderId String
+  folder   BookmarkFolder @relation(fields: [folderId], references: [id])
+  postId   Int
+  post     Post           @relation(fields: [postId], references: [id])
+
+  @@id([folderId, postId], name: "bookmarkId")
 }

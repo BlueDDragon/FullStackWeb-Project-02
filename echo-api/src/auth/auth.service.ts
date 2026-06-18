@@ -1,72 +1,57 @@
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { MeAuthDto } from './dto/me-auth.dto';
-import { LoginAuthDto } from './dto/login-auth.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { AUTH_MESSAGES } from '../messages/auth.messages';
 import { RegisterAuthDto } from './dto/register-auth.dto';
-import { COMMON_MESSAGES } from '../messages/common.messages';
-// import { RedisService } from '../redis/redis.service';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { AuthRequest } from './interfaces/auth-request.interface';
+import * as bcrypt from 'bcrypt';
+import { bcryptConstants } from '../constants';
+import { AUTH_MESSAGES, COMMON_MESSAGES } from '../messages';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-    /*@Inject() private readonly redis: RedisService*/ ) {}
+  constructor(private readonly userService: UsersService,
+    private readonly jwtService: JwtService
+  ) {}
 
-  async register(registerAuthDto: RegisterAuthDto) {
-    const exitUserId = await this.prisma.user.findUnique({ where: { userId: registerAuthDto.userId }});
-    if (exitUserId) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_ID, registerAuthDto.userId);
-    
-    const exitEmail = await this.prisma.user.findUnique({ where: { email: registerAuthDto.email }});
-    if (exitEmail) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_EMAIL, registerAuthDto.email);
+  async register(registerAutoDto: RegisterAuthDto) {
+    const { username, displayName, email } = registerAutoDto;
 
-    const passwordHash = await bcrypt.hash(registerAuthDto.password, Number(process.env.BCRYPT_ROUND) || 10);
-    const data = { ...registerAuthDto, password: passwordHash };
-    const { password, ...result } = await this.prisma.user.create({ data: data });
+    const passwordHash = await bcrypt.hash(registerAutoDto.password, bcryptConstants.round);
+    const { password, ...result } = await this.userService.create({ username, displayName, email, password: passwordHash });
 
-    return { messages: AUTH_MESSAGES.SUCCESS.REGISTER, user: result };
+    return { messages: AUTH_MESSAGES.SUCCESS.REGISTER, user: {...result} };
   }
 
   async login(loginAuthDto: LoginAuthDto) {
-    const user = await this.prisma.user.findUnique({ where: { userId: loginAuthDto.userId }});
-    if (!user) throw new UnauthorizedException(AUTH_MESSAGES.ERROR.LOGIN_VALID_ID);
+    const user = await this.userService.findByUsername(loginAuthDto.username);
 
     const isPasswordValid = await bcrypt.compare(loginAuthDto.password, user.password);
     if (!isPasswordValid) throw new UnauthorizedException(AUTH_MESSAGES.ERROR.LOGIN_VALID_PW);
 
     const userPayLoad: JwtPayload = {
       sub: user.id,
-      userId: user.userId,
       username: user.username,
+      displayname: user.displayName,
     };
 
     const accessToken = this.jwtService.sign(userPayLoad);
-    return { messages: AUTH_MESSAGES.SUCCESS.LOGIN, login: true, accessToken, user: { ...userPayLoad }};
+    const { password, ...result } = user;
+    return { messages: AUTH_MESSAGES.SUCCESS.LOGIN, login: true, accessToken, user: {...result} }
   }
 
-  async logout(userPayLoad: JwtPayload, token: string) {
-    // const decoded = this.jwtService.decode(token) as { exp: number };
-    // const now = Math.floor(Date.now() / 1000);
-    // const ttl = decoded.exp - now;
-    // if (ttl > 0) await this.redis.set(`blacklist:${token}`, userPayLoad.userId, ttl);
-
-    return { messages: AUTH_MESSAGES.SUCCESS.LOGOUT, logout: true, user: {...userPayLoad}};
+  // TODO
+  async logout(auth: AuthRequest) {
+    return { messages: AUTH_MESSAGES.SUCCESS.LOGOUT, login: false };
   }
 
-  async me(userPayLoad: JwtPayload) {
-    console.log(`userPayLoad:`, userPayLoad);
+  async me(auth: AuthRequest) {
+    if (!auth) return { messages: COMMON_MESSAGES.ERROR.UNAUTHORIZED, login: false };
 
-    if (!userPayLoad) return { messages: COMMON_MESSAGES.ERROR.UNAUTHORIZED, login: false };
+    const user = await this.userService.findOne(auth.id);
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userPayLoad.sub },
-      select: { userId: true, username: true, profileImageUrl: true, createdAt: true },
-    });
-    if (!user) return { messages: COMMON_MESSAGES.ERROR.UNAUTHORIZED, login: false };
-
-    return { messages: AUTH_MESSAGES.SUCCESS.ME, login: true, user };
+    const { password, ...result } = user;
+    return { messages: AUTH_MESSAGES.SUCCESS.ME, login: true, user: {...result} };
   }
 }

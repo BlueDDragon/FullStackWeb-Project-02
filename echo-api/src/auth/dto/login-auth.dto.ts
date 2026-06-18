@@ -4,7 +4,7 @@ import { IsString, MinLength } from "class-validator";
 export class LoginAuthDto {
     @ApiProperty({ example: "example00" })
     @IsString()
-    userId: string;
+    username: string;
 
     @ApiProperty({ example: "00000000" })
     @IsString()

@@ -1,20 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginAuthDto } from './dto/login-auth.dto';
-import { MeAuthDto } from './dto/me-auth.dto';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import type { AuthRequest } from './interfaces/auth-request.interface';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { type AuthRequest } from './interfaces/auth-request.interface';
+import { LoginAuthDto } from './dto/login-auth.dto';
 import { RegisterAuthDto } from './dto/register-auth.dto';
+import { CurrentAuth } from './decorators/current-auth.decorator';
 
+@ApiTags(`Auth`)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @ApiOperation({ summary: "회원가입" })
-  register(@Body() registerAuthDto: RegisterAuthDto) {
-    return this.authService.register(registerAuthDto);
+  register(@Body() registerAutoDto: RegisterAuthDto) {
+    return this.authService.register(registerAutoDto);
   }
 
   @Post('login')
@@ -23,24 +24,19 @@ export class AuthController {
     return this.authService.login(loginAuthDto);
   }
 
-  @Post('logout') 
+  @Post('logout')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "로그아웃" })
-  logout(@Req() req: AuthRequest) {
-    const authorization = req.headers.authorization;
-    if (!authorization || !authorization.startsWith('Bearer ')) throw new UnauthorizedException();
-
-    const token = authorization.split(' ')[1];
-    if (!token) throw new UnauthorizedException();
-
-    return this.authService.logout(req.user, token);
+  logout(@CurrentAuth() auth: AuthRequest) {
+    return this.authService.logout(auth);
   }
-  
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "현재 로그인 상태 호출" })
-  me(@Req() req: AuthRequest) {
-    return this.authService.me(req.user);
+  @ApiOperation({ summary: "현재 로그인 상태 호출"})
+  me(@CurrentAuth() auth: AuthRequest) {
+    return this.authService.me(auth);
   }
 }

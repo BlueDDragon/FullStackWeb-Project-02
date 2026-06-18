@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  email           String  @unique
+  password        String
+  username        String
+  profileImageUrl String?
+
+  posts     Post[]
+  bookmarks Bookmark[]
+
+  followers  Follow[] @relation("Follower")
+  followings Follow[] @relation("Following")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Follow {
+  followerId String
+  follower   User   @relation("Follower", fields: [followerId], references: [id])
+
+  followingId String
+  following   User   @relation("Following", fields: [followingId], references: [id])
+
+  isMuted    Boolean @default(false)
+  isFavorite Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@id([followerId, followingId], name: "followId")
+}
+
+enum PostState {
+  PUBLIC
+  PRIVATE
+  NOTICE
+  DELETED
+  ERROR
+}
+
+model Post {
+  id      Int       @id @default(autoincrement())
+  state   PostState @default(PUBLIC)
+  content String
+
+  rootPostId Int?
+  rootPost   Post?  @relation("RootPost", fields: [rootPostId], references: [id])
+  rootOf     Post[] @relation("RootPost")
+
+  parentPostId Int?
+  parentPost   Post?  @relation("ParentPost", fields: [parentPostId], references: [id])
+  replies      Post[] @relation("ParentPost")
+
+  // like         Int       @default(0)
+  // bookmark     Int       @default(0)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [userId])
+
+  // likes Post[] @relation("Likes")
+  // bookmarks Bookmark[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bookmark {
+  name       String
+  isFavorite Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [userId])
+
+  // posts Post[]
+
+  @@id([userId, name], name: "bookmarkId")
+}

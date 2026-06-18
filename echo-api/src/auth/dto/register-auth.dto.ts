@@ -5,12 +5,12 @@ export class RegisterAuthDto {
     @ApiProperty({ example: "example00" })
     @IsString()
     @Length(1, 20)
-    userId: string;
+    username: string;
 
     @ApiProperty({ example: "예시" })
     @IsString()
     @Length(1, 20)
-    username: string;
+    displayName: string;
 
     @ApiProperty({ example: "example00@a.com" })
     @IsString()
@@ -21,9 +21,4 @@ export class RegisterAuthDto {
     @IsString()
     @MinLength(8)
     password: string;
-
-    // @ApiProperty({ example: "/image/profile.png" })
-    // @IsString()
-    // @IsOptional()
-    // profileImageUrl: string;
 }

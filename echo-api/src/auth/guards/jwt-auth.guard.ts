@@ -1,13 +1,8 @@
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import Redis from 'ioredis';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-    constructor(private readonly redis: Redis) {
-        super();
-    }
-
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const isValid = await super.canActivate(context);
         if (!isValid) throw new UnauthorizedException();

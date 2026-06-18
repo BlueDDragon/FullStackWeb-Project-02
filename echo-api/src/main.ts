@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { commonConstants } from './constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,7 +13,7 @@ async function bootstrap() {
   // Swagger
   const config = new DocumentBuilder()
     .setTitle("Echo API Document")
-    .setDescription("반응형 SNS 에코의 API 안내 문서")
+    .setDescription("텍스트 중심 SNS 에코의 API 안내 문서")
     .setVersion("1.0")
     .addBearerAuth()
     .build();
@@ -20,18 +21,12 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: `http://localhost:${process.env.NEXT_PORT ?? 3000}`,
+    origin: `http://localhost:${commonConstants.clientPort}`,
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(commonConstants.port);
 
-  console.log(`Start to Server: http://localhost:${process.env.PORT ?? 3000} (swagger: /docs)`);
+  console.log(`Start to Server: http://localhost:${commonConstants.port} (swagger: /docs)`);
 }
 bootstrap();
-
-// npm i
-// class-validator class-transformer dotenv
-// @prisma/client@6
-// -D prisma@6
-// @nestjs/swagger
