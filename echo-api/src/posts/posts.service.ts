@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { COMMON_MESSAGES, POST_MESSAGES } from '../common/messages';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
+import { domainConstants, portConstants, uploadConstans } from '../common/constants';
 
 @Injectable()
 export class PostsService {
@@ -67,5 +68,28 @@ export class PostsService {
 
     await this.prisma.post.delete({ where: { id }});
     return { messages: POST_MESSAGES.SUCCESS.DELETE_POST, post: removedPost };
+  }
+  
+  async uploadPostImage(id: number, auth: AuthRequest, files: Express.Multer.File[]) {
+    if (!files || files.length === 0) throw new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST);
+
+    const user = await this.userService.findOne(auth.id);
+    const post = await this.findOne(id);
+    if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+
+    const uploadedPosts: { imgUrl: string }[] = [];
+
+    for (const file of files) {
+      const filename = `${domainConstants.domain}:${portConstants.port}/${uploadConstans.postDir}/${file.filename}`;
+      const uploadedPost = await this.prisma.postImage.create({ 
+        data: {
+          postId: id,
+          imgUrl: filename,
+        }
+      });
+      uploadedPosts.push({ imgUrl: uploadedPost.imgUrl });
+    }
+
+    return uploadedPosts;
   }
 }

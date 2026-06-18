@@ -20,4 +20,5 @@ export const uploadConstans = {
     dir: "uploads",
     profileDir: "uploads/user/profile",
     headerDir: "uploads/user/header",
+    postDir: "uploads/user/post",
 }

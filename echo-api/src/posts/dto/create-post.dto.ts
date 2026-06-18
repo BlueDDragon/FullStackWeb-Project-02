@@ -1,16 +1,19 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { PostState } from "@prisma/client";
+import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsOptional, IsString, Length } from "class-validator";
 
 export class CreatePostDto {
-    @ApiProperty({ example: 1 })
+    @ApiPropertyOptional({ example: 1 })
     @IsInt()
     @IsOptional()
+    @Type(() => Number)
     rootPostId: number;
     
-    @ApiProperty({ example: 2 })
+    @ApiPropertyOptional({ example: 2 })
     @IsInt()
     @IsOptional()
+    @Type(() => Number)
     parentPostId: number;
 
     @ApiProperty({ example: PostState.PUBLIC })
@@ -25,4 +28,13 @@ export class CreatePostDto {
     // @ApiProperty({ example: "example00" })
     // @IsString()
     // authorId: string;
+}
+
+export class CreatePostWithImagesDto extends CreatePostDto {
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+        isArray: true,
+    })
+    images: any[];
 }
