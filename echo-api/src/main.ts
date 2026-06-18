@@ -2,9 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { commonConstants } from './constants';
+import { domainConstants, portConstants, uploadConstans } from './common/constants';
+import { mkdirSync } from 'fs';
 
 async function bootstrap() {
+  // Upload Dir
+  mkdirSync(uploadConstans.dir, { recursive: true });
+  mkdirSync(uploadConstans.profileDir, { recursive: true });
+  mkdirSync(uploadConstans.headerDir, { recursive: true });
+
   const app = await NestFactory.create(AppModule);
 
   // Validator
@@ -21,12 +27,12 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: `http://localhost:${commonConstants.clientPort}`,
+    origin: `${domainConstants.domain}:${portConstants.clientPort}`,
     credentials: true,
   });
 
-  await app.listen(commonConstants.port);
+  await app.listen(portConstants.port);
 
-  console.log(`Start to Server: http://localhost:${commonConstants.port} (swagger: /docs)`);
+  console.log(`Start to Server: ${domainConstants}:${portConstants.port} (swagger: /docs)`);
 }
 bootstrap();

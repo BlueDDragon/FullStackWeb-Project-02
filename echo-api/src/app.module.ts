@@ -7,9 +7,17 @@ import { PostsModule } from './posts/posts.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { LikesModule } from './likes/likes.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { uploadConstans } from './common/constants';
 
 @Module({
-  imports: [AuthModule, UsersModule, PostsModule, BookmarksModule, LikesModule, PrismaModule],
+  imports: [AuthModule, UsersModule, PostsModule, BookmarksModule, LikesModule, PrismaModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), uploadConstans.dir),
+      serveRoot: `/${uploadConstans.dir}`,
+    })
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

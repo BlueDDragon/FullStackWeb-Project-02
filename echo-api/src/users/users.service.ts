@@ -1,19 +1,19 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { AUTH_MESSAGES } from '../messages';
+import { AUTH_MESSAGES, COMMON_MESSAGES, POST_MESSAGES } from '../common/messages';
+import { AuthRequest } from '../auth/interfaces/auth-request.interface';
+import * as bcrypt from 'bcrypt';
+import { bcryptConstants, domainConstants, portConstants, uploadConstans } from '../common/constants';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const exitsUsername = await this.findByUsername(createUserDto.username);
-    if (exitsUsername) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_USERNAME, createUserDto.username);
-
-    const exitsEmail = await this.findByEmail(createUserDto.email);
-    if (exitsEmail) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_EMAIL, createUserDto.email);
+    await this.exitsUsername(createUserDto.username);
+    await this.exitsEmail(createUserDto.email);
 
     return await this.prisma.user.create({
       data: {
@@ -36,39 +36,100 @@ export class UsersService {
 
   async findByUsername(username: string) {
     const user = await this.prisma.user.findUnique({ where: { username }});
-    if (!user) throw new NotFoundException(AUTH_MESSAGES.ERROR.NOT_FOUND_USER);
+    if (!user) throw new NotFoundException(AUTH_MESSAGES.ERROR.NOT_FOUND_USERNAME);
     return user;
   }
 
   async findByEmail(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email }});
-    if (!user) throw new NotFoundException(AUTH_MESSAGES.ERROR.NOT_FOUND_USER);
+    if (!user) throw new NotFoundException(AUTH_MESSAGES.ERROR.NOT_FOUND_EMAIL);
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async exitsUsername(username: string) {
+    const user = await this.prisma.user.findUnique({ where: { username }});
+    if (user) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_USERNAME);
+  }
+
+  async exitsEmail(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email }});
+    if (user) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_EMAIL);
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto, auth: AuthRequest) {
+    if (id !== auth.id) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+    
     await this.findOne(id);
 
-    if (updateUserDto.username) {
-      const exitsUsername = await this.findByUsername(updateUserDto.username);
-      if (exitsUsername) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_USERNAME, updateUserDto.username); 
-    }
+    if (updateUserDto.username) await this.exitsUsername(updateUserDto.username);
 
-    if (updateUserDto.email) {
-      const exitsEmail = await this.findByEmail(updateUserDto.email);
-      if (exitsEmail) throw new ConflictException(AUTH_MESSAGES.ERROR.CONFLICT_EMAIL, updateUserDto.email);
-    }
+    if (updateUserDto.email) await this.exitsEmail(updateUserDto.email);
 
-    return await this.prisma.user.update({
+    const password = 
+      (updateUserDto.password ? 
+      await bcrypt.hash(updateUserDto.password, bcryptConstants.round) : updateUserDto.password);
+
+    const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: {
+        ...updateUserDto,
+        password,
+      }
     });
+
+    return { messages: AUTH_MESSAGES.SUCCESS.UPDATE_USER, user: updatedUser };
   }
 
-  async remove(id: string) {
-    const user = await this.findOne(id);
+  async remove(id: string, auth: AuthRequest) {
+    if (id !== auth.id) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+
+    const removedUser = await this.findOne(id);
     await this.prisma.user.delete({ where: { id }});
 
-    return user;
+    return { messages: AUTH_MESSAGES.SUCCESS.DELETE_USER, user: removedUser };
+  }
+
+  async getPosts(id: string, auth: AuthRequest) {
+    if (id !== auth.id) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        posts: true,
+      }
+    });
+    if (!user) throw new NotFoundException(AUTH_MESSAGES.ERROR.NOT_FOUND_USER);
+
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, posts: user.posts };
+  }
+
+  async uploadProfileImage(auth: AuthRequest, file: Express.Multer.File) {
+    if (!file) throw new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST);
+
+    const filename = `${domainConstants.domain}:${portConstants.port}/${uploadConstans.profileDir}/${file.filename}`;
+    const uploadedUser = await this.prisma.user.update({
+      where: { id: auth.id },
+      data: {
+        profileImgUrl: filename,
+      }
+    });
+
+    const { password, ...rusult } = uploadedUser;
+    return { messages: COMMON_MESSAGES.SUCCESS.UPLOAD, user: rusult };
+  }
+  
+  async uploadHeaderImage(auth: AuthRequest, file: Express.Multer.File) {
+    if (!file) throw new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST);
+
+    const filename = `${domainConstants.domain}:${portConstants.port}/${uploadConstans.headerDir}/${file.filename}`;
+    const uploadedUser = await this.prisma.user.update({
+      where: { id: auth.id },
+      data: {
+        headerImgUrl: filename,
+      }
+    });
+
+    const { password, ...rusult } = uploadedUser;
+    return { messages: COMMON_MESSAGES.SUCCESS.UPLOAD, user: rusult };
   }
 }

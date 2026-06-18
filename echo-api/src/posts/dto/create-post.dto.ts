@@ -22,7 +22,7 @@ export class CreatePostDto {
     @Length(1, 140)
     content: string;
 
-    @ApiProperty({ example: "example00" })
-    @IsString()
-    authorId: string;
+    // @ApiProperty({ example: "example00" })
+    // @IsString()
+    // authorId: string;
 }

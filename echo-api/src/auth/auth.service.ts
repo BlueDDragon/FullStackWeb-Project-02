@@ -5,8 +5,8 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { AuthRequest } from './interfaces/auth-request.interface';
 import * as bcrypt from 'bcrypt';
-import { bcryptConstants } from '../constants';
-import { AUTH_MESSAGES, COMMON_MESSAGES } from '../messages';
+import { bcryptConstants } from '../common/constants';
+import { AUTH_MESSAGES, COMMON_MESSAGES } from '../common/messages';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
