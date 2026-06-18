@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, Query } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -6,9 +6,10 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nes
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { type AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { CurrentAuth } from '../auth/decorators/current-auth.decorator';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { uploadConstans } from '../common/constants';
 import { createImageUploadOptions } from '../common/upload.config';
+import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -23,6 +24,20 @@ export class PostsController {
     @Body() createPostDto: CreatePostDto,
     @CurrentAuth() auth: AuthRequest) {
     return this.postsService.create(createPostDto, auth);
+  }
+  
+  @Get('')
+  @ApiOperation({ summary: "게시글 목록 조회" })
+  findAll(@Query() query: QueryPaginationDto) {
+    return this.postsService.findAll(query.page, query.limit);
+  }
+  
+  @Get(':id/thread')
+  @ApiOperation({ summary: "게시글 목록 조회(스레드)" })
+  findThread(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: QueryPaginationDto) {
+    return this.postsService.findThread(id, query.page, query.limit);
   }
 
   @Patch(':id')

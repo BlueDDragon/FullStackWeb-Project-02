@@ -6,6 +6,8 @@ import { AUTH_MESSAGES, COMMON_MESSAGES, POST_MESSAGES } from '../common/message
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
 import * as bcrypt from 'bcrypt';
 import { bcryptConstants, domainConstants, portConstants, uploadConstans } from '../common/constants';
+import { POST_ORDERBY, POST_SELECT } from '../posts/post.select';
+import { getPagination, getTotalPage } from '../pagination/pagination';
 
 @Injectable()
 export class UsersService {
@@ -89,18 +91,45 @@ export class UsersService {
     return { messages: AUTH_MESSAGES.SUCCESS.DELETE_USER, user: removedUser };
   }
 
-  async getPosts(id: string, auth: AuthRequest) {
-    if (id !== auth.id) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+  async getPosts(id: string, page: number = 1, limit: number = 10) {
+    await this.findOne(id);
+
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { authorId: id },
+        select: POST_SELECT, 
+        orderBy: POST_ORDERBY.NEWEST, 
+        ...getPagination(page, limit)
+      }),
+      this.prisma.post.count({
+        where: { authorId: id },
+      })
+    ]);
+    
+    const totalPage = getTotalPage(total, limit);
+
+    // const { password, ...rusult } = user;
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, /*user: rusult,*/ posts, 
+      page, limit, total, totalPage };
+  }
+
+  async getMedia(id: string, page: number = 1, limit: number = 10) {
+    await this.findOne(id);
 
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: {
-        posts: true,
-      }
+      include: { 
+        posts: { 
+          select: { images: true }, 
+          orderBy: POST_ORDERBY.NEWEST 
+        }
+      },
     });
-    if (!user) throw new NotFoundException(AUTH_MESSAGES.ERROR.NOT_FOUND_USER);
 
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, posts: user.posts };
+    const media: string[] = [];
+    user?.posts.forEach(post => post.images.forEach(image => media.push(image.imgUrl)));
+
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, media: media };
   }
 
   async uploadProfileImage(auth: AuthRequest, file: Express.Multer.File) {

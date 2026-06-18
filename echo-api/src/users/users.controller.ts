@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,6 +9,7 @@ import { type AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createImageUploadOptions } from '../common/upload.config';
 import { uploadConstans } from '../common/constants';
+import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 
 @ApiTags('User')
 @Controller('users')
@@ -37,13 +38,19 @@ export class UsersController {
   }
 
   @Get(':id/posts')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: "사용자 게시글 목록 조회" })
   getPosts(
     @Param('id') id: string,
-    @CurrentAuth() auth: AuthRequest) {
-      return this.usersService.getPosts(id, auth);
+    @Query() query: QueryPaginationDto) {
+      return this.usersService.getPosts(id, query.page, query.limit);
+  }
+  
+  @Get(':id/media')
+  @ApiOperation({ summary: "사용자 미디어 목록 조회" })
+  getMedia(
+    @Param('id') id: string,
+    @Query() query: QueryPaginationDto) {
+      return this.usersService.getMedia(id, query.page, query.limit);
   }
 
   @Post('me/profile-image')

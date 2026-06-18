@@ -6,6 +6,8 @@ import { UsersService } from '../users/users.service';
 import { COMMON_MESSAGES, POST_MESSAGES } from '../common/messages';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { domainConstants, portConstants, uploadConstans } from '../common/constants';
+import { POST_ORDERBY, POST_SELECT } from './post.select';
+import { getPagination, getTotalPage } from '../pagination/pagination';
 
 @Injectable()
 export class PostsService {
@@ -36,8 +38,56 @@ export class PostsService {
     return { messages: POST_MESSAGES.SUCCESS.CREATE_POST, post: createdPost };
   }
 
-  async findAll() {
-    return await this.prisma.post.findMany();
+  async findAll(page: number = 1, limit: number = 10) {
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        select: POST_SELECT,
+        orderBy: POST_ORDERBY.NEWEST,
+        ...getPagination(page, limit)
+      }),
+      this.prisma.post.count()
+    ]);
+    
+    const totalPage = getTotalPage(total, limit);
+
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, posts: posts, 
+      page, limit, total, totalPage };
+  }
+
+  async findThread(id: number, page: number = 1, limit: number = 10) {
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { rootPostId: id },
+        select: POST_SELECT,
+        orderBy: POST_ORDERBY.NEWEST,
+        ...getPagination(page, limit)
+      }),
+      this.prisma.post.count({
+        where: { rootPostId: id },
+      })
+    ]);
+    
+    const totalPage = getTotalPage(total, limit);
+
+    const map = new Map();
+    for (const post of posts) {
+      map.set(post.id, {
+        ...post,
+        children: [],
+      });
+    }
+
+    const roots: any = [];
+    for (const post of map.values()) {
+      if (post.parentPostId && map.has(post.parentPostId)) {
+        map.get(post.parentPostId).children.push(post);
+      } else {
+        roots.push(post);
+      }
+    }
+
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, posts: roots, 
+      page, limit, total, totalPage };
   }
 
   async findOne(id: number) {
@@ -77,18 +127,19 @@ export class PostsService {
     const post = await this.findOne(id);
     if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
 
-    const uploadedPosts: { imgUrl: string }[] = [];
-
-    for (const file of files) {
-      const filename = `${domainConstants.domain}:${portConstants.port}/${uploadConstans.postDir}/${file.filename}`;
-      const uploadedPost = await this.prisma.postImage.create({ 
-        data: {
-          postId: id,
-          imgUrl: filename,
-        }
-      });
-      uploadedPosts.push({ imgUrl: uploadedPost.imgUrl });
-    }
+    const uploadedPosts = await Promise.all(
+      files.map(file =>
+        this.prisma.postImage.create({ 
+          data: {
+            postId: id,
+            imgUrl: `${domainConstants.domain}:${portConstants.port}/${uploadConstans.postDir}/${file.filename}`,
+          }, 
+          select: {
+            imgUrl: true,
+          }
+        })
+      )
+    );
 
     return uploadedPosts;
   }
