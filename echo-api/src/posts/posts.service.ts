@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto, UpdatePostWithImagesDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -106,16 +106,16 @@ export class PostsService {
       page, limit, total, totalPage };
   }
 
-  async getThread(id: number, page: number = 1, limit: number = 10) {
+  async getThread(postId: number, page: number = 1, limit: number = 10) {
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
-        where: { rootPostId: id },
+        where: { rootPostId: postId },
         select: POST_SELECT,
         orderBy: POST_ORDERBY.NEWEST,
         ...getPagination(page, limit)
       }),
       this.prisma.post.count({
-        where: { rootPostId: id },
+        where: { rootPostId: postId },
       })
     ]);
     
@@ -142,55 +142,63 @@ export class PostsService {
       page, limit, total, totalPage };
   }
 
-  async getLikesByPost(id: number, page: number = 1, limit: number = 10) {
-    await this.findOne(id);
-    const likes = await this.likeService.findByPost(id, page, limit);
+  async getLikesByPost(postId: number, page: number = 1, limit: number = 10) {
+    await this.findOne(postId);
+    const likes = await this.likeService.findByPost(postId, page, limit);
     return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, likes: likes }
   }
 
-  async findOne(id: number) {
+  async findOne(postId: number) {
     const post = await this.prisma.post.findUnique({ 
-      where: { id },
+      where: { id: postId },
       select: POST_SELECT,
     });
     if (!post) throw new NotFoundException(POST_MESSAGES.ERROR.NOT_FOUND_POST);
     return post;
   }
 
-  async update(id: number, updatePostWithImagesDto: UpdatePostWithImagesDto, auth: AuthRequest, files: Express.Multer.File[]) {
+  async exitsPost(postId: number) {
+    const post = await this.prisma.post.findUnique({ 
+      where: { id: postId },
+      select: POST_SELECT,
+    });
+    if (post) throw new ConflictException(COMMON_MESSAGES.ERROR.CONFLICT);
+  }
+
+  async update(postId: number, updatePostWithImagesDto: UpdatePostWithImagesDto, auth: AuthRequest, files: Express.Multer.File[]) {
     const user = await this.userService.findOne(auth.id);
-    const post = await this.findOne(id);
+    const post = await this.findOne(postId);
     if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
 
     const { images, removeImages, ...result } = updatePostWithImagesDto;
     const updatedPost = await this.prisma.post.update({
-      where: { id },
+      where: { id: postId },
       data: {
         ...result,
       }
     });
 
     const uploadedImages = await this.uploadPostImages(updatedPost.id, auth, files);
-    const removedImages = await this.removePostImages(id, auth, removeImages);
-    const resultPost = await this.findOne(id);
+    const removedImages = await this.removePostImages(postId, auth, removeImages);
+    const resultPost = await this.findOne(postId);
 
     return { messages: POST_MESSAGES.SUCCESS.UPDATE_POST, post: resultPost, removed: removedImages };
   }
 
-  async remove(id: number, auth: AuthRequest) {
+  async remove(postId: number, auth: AuthRequest) {
     const user = await this.userService.findOne(auth.id);
-    const removedPost = await this.findOne(id);
+    const removedPost = await this.findOne(postId);
     if (user.id !== removedPost.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
 
-    await this.prisma.post.delete({ where: { id }});
+    await this.prisma.post.delete({ where: { id: postId }});
     return { messages: POST_MESSAGES.SUCCESS.DELETE_POST, post: removedPost };
   }
   
-  async uploadPostImages(id: number, auth: AuthRequest, files: Express.Multer.File[]) {
+  async uploadPostImages(postId: number, auth: AuthRequest, files: Express.Multer.File[]) {
     if (!files || files.length === 0) return [];
 
     const user = await this.userService.findOne(auth.id);
-    const post = await this.findOne(id);
+    const post = await this.findOne(postId);
     if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
 
     const uploadedPosts = await Promise.all(
@@ -198,7 +206,7 @@ export class PostsService {
         return this.prisma.postImage.create({ 
           data: {
             id: getImageId(file),
-            postId: id,
+            postId: postId,
             imgUrl: getImageUploadUrl(file),
           }, 
           select: POST_IMAGE_SELECT,
@@ -209,11 +217,11 @@ export class PostsService {
     return uploadedPosts;
   }
 
-  async removePostImages(id: number, auth: AuthRequest, filenames: string[]) {
+  async removePostImages(postId: number, auth: AuthRequest, filenames: string[]) {
     if (!filenames || filenames.length === 0) return [];
 
     const user = await this.userService.findOne(auth.id);
-    const post = await this.findOne(id);
+    const post = await this.findOne(postId);
     if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
 
     const removedImages: { imgUrl: string, }[] = [];
@@ -230,7 +238,7 @@ export class PostsService {
             select: { postId: true, imgUrl: true }
           });
 
-        if (!removedImage || removedImage.postId != id) return;
+        if (!removedImage || removedImage.postId != postId) return;
         
         await this.prisma.postImage.delete({ where: { id: imageId }});
         removedImages.push({ imgUrl: removedImage.imgUrl });

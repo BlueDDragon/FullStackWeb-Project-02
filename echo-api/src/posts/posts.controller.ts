@@ -36,23 +36,23 @@ export class PostsController {
     return this.postsService.getPosts(query.page, query.limit);
   }
   
-  @Get(':id/thread')
+  @Get(':postId/thread')
   @ApiOperation({ summary: "게시글 목록 조회 (스레드 형태)" })
   findThread(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('postId', ParseIntPipe) postId: number,
     @Query() query: QueryPaginationDto) {
-    return this.postsService.getThread(id, query.page, query.limit);
+    return this.postsService.getThread(postId, query.page, query.limit);
   }
 
-  @Get(':id/likes')
+  @Get(':postId/likes')
   @ApiOperation({ summary: "게시글 좋아요 목록 조회" })
   getLikesByUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('postId', ParseIntPipe) postId: number,
     @Query() query: QueryPaginationDto) {
-    return this.postsService.getLikesByPost(id, query.page, query.limit);
+    return this.postsService.getLikesByPost(postId, query.page, query.limit);
   }
 
-  @Patch(':id')
+  @Patch(':postId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiConsumes("multipart/form-data")
@@ -60,20 +60,20 @@ export class PostsController {
   @UseInterceptors(FilesInterceptor('images', 4, createImageUploadOptions(uploadConstants.postDir)))
   @ApiOperation({ summary: "게시글 수정" })
   update(
-    @Param('id', ParseIntPipe) id: number, 
+    @Param('postId', ParseIntPipe) postId: number, 
     @Body() updatePostWithImagesDto: UpdatePostWithImagesDto,
     @CurrentAuth() auth: AuthRequest,
     @UploadedFiles() files: Express.Multer.File[]) {
-    return this.postsService.update(id, updatePostWithImagesDto, auth, files);
+    return this.postsService.update(postId, updatePostWithImagesDto, auth, files);
   }
 
-  @Delete(':id')
+  @Delete(':postId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "게시글 삭제" })
   remove(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('postId', ParseIntPipe) postId: number,
     @CurrentAuth() auth: AuthRequest) {
-    return this.postsService.remove(id, auth);
+    return this.postsService.remove(postId, auth);
   }
 }
