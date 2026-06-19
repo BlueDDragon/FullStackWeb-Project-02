@@ -1,5 +1,6 @@
 export const COMMON_MESSAGES = {
     SUCCESS: {
+        SUCCESS: "요청에 성공했습니다.",
         UPLOAD: "파일을 성공적으로 업로드했습니다.",
     },
 
@@ -7,6 +8,7 @@ export const COMMON_MESSAGES = {
         SERVER: "서버 오류가 발생했습니다.",
         UNAUTHORIZED: "권한이 없습니다.",
         NOT_FOUND: "요청한 내용을 찾을 수 없습니다.",
+        CONFLICT: "중복된 요청입니다.",
         BAD_REQUEST: "요청 내용이 잘못되었습니다.",
     },
 };

@@ -9,13 +9,13 @@ import { LikesModule } from './likes/likes.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { uploadConstans } from './common/constants';
+import { uploadConstants } from './common/constants';
 
 @Module({
   imports: [AuthModule, UsersModule, PostsModule, BookmarksModule, LikesModule, PrismaModule,
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), uploadConstans.dir),
-      serveRoot: `/${uploadConstans.dir}`,
+      rootPath: join(process.cwd(), uploadConstants.dir),
+      serveRoot: `/${uploadConstants.dir}`,
     })
   ],
   controllers: [AppController],

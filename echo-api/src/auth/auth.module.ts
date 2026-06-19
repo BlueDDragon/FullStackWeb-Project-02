@@ -5,15 +5,17 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersService } from '../users/users.service';
 import { JwtModule } from '@nestjs/jwt'
 import { jwtConstants } from '../common/constants';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
+    UsersModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expiresIn as any }
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService, JwtStrategy],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

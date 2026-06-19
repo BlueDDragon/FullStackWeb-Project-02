@@ -16,9 +16,9 @@ export const jwtConstants = {
     expiresIn: process.env.JWT_EXPIRES_IN ?? '1h',
 }
 
-export const uploadConstans = {
+export const uploadConstants = {
     dir: "uploads",
     profileDir: "uploads/user/profile",
     headerDir: "uploads/user/header",
-    postDir: "uploads/user/post",
+    postDir: "uploads/post",
 }

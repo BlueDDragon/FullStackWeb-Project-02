@@ -8,8 +8,9 @@ import { CurrentAuth } from '../auth/decorators/current-auth.decorator';
 import { type AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createImageUploadOptions } from '../common/upload.config';
-import { uploadConstans } from '../common/constants';
+import { uploadConstants } from '../common/constants';
 import { QueryPaginationDto } from '../pagination/query-pagination.dto';
+import { UploadImagesDto } from './dto/upload-image.dto';
 
 @ApiTags('User')
 @Controller('users')
@@ -53,12 +54,20 @@ export class UsersController {
       return this.usersService.getMedia(id, query.page, query.limit);
   }
 
+  @Get(':id/likes')
+  @ApiOperation({ summary: "사용자 좋아요 목록 조회" })
+  getLikesByUser(
+    @Param('id') id: string,
+    @Query() query: QueryPaginationDto) {
+    return this.usersService.getLikesByUser(id, query.page, query.limit);
+  }
+
   @Post('me/profile-image')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiConsumes("multipart/form-data")
-  @ApiBody({ schema: { type: "object", properties: {image: {type: "string", format: "binary"}}}})
-  @UseInterceptors(FileInterceptor('image', createImageUploadOptions(uploadConstans.profileDir)))
+  @ApiBody({ type: UploadImagesDto })
+  @UseInterceptors(FileInterceptor('image', createImageUploadOptions(uploadConstants.profileDir)))
   @ApiOperation({ summary: "사용자 프로필 이미지 업로드" })
   uploadProfileImage(
     @CurrentAuth() auth: AuthRequest,
@@ -70,8 +79,8 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiConsumes("multipart/form-data")
-  @ApiBody({ schema: { type: "object", properties: {image: {type: "string", format: "binary"}}}})
-  @UseInterceptors(FileInterceptor('image', createImageUploadOptions(uploadConstans.headerDir)))
+  @ApiBody({ type: UploadImagesDto })
+  @UseInterceptors(FileInterceptor('image', createImageUploadOptions(uploadConstants.headerDir)))
   @ApiOperation({ summary: "사용자 헤더 이미지 업로드" })
   uploadHeaderImage(
     @CurrentAuth() auth: AuthRequest,

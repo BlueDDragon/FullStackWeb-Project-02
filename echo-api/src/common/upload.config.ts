@@ -1,9 +1,9 @@
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, parse } from 'path';
 import { randomUUID } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
 import { COMMON_MESSAGES } from './messages';
-import { uploadConstans } from './constants';
+import { domainConstants, portConstants, uploadConstants } from './constants';
 
 export const ALLOWED_MINE = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
@@ -11,7 +11,7 @@ export const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 // export const imageUploadOptions = {
 //     storage: diskStorage({
-//         destination: uploadConstans.dir,
+//         destination: uploadConstants.dir,
 //         filename:(_req, file, callback) => {
 //             const unique = randomUUID();
 //             const ext = extname(file.originalname).toLowerCase();
@@ -48,4 +48,12 @@ export function createImageUploadOptions(destination: string) {
         limit: { fileSize: MAX_FILE_SIZE },
         limits: { fileSize: MAX_FILE_SIZE },
     }
+}
+
+export function getImageId(file: Express.Multer.File) {
+    return parse(file.filename).name;
+}
+
+export function getImageUploadUrl(file: Express.Multer.File) {
+    return `${domainConstants.domain}:${portConstants.port}/${file.path}`;
 }

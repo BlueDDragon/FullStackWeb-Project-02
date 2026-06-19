@@ -1,17 +1,27 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AUTH_MESSAGES, COMMON_MESSAGES, POST_MESSAGES } from '../common/messages';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
 import * as bcrypt from 'bcrypt';
-import { bcryptConstants, domainConstants, portConstants, uploadConstans } from '../common/constants';
-import { POST_ORDERBY, POST_SELECT } from '../posts/post.select';
-import { getPagination, getTotalPage } from '../pagination/pagination';
+import { bcryptConstants } from '../common/constants';
+import { POST_ORDERBY } from '../posts/post.select';
+import { getImageUploadUrl } from '../common/upload.config';
+import { PostsService } from '../posts/posts.service';
+import { LikesService } from '../likes/likes.service';
+import { getPagination } from '../pagination/pagination';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService,
+
+    @Inject(forwardRef(() => PostsService))
+    private readonly postService: PostsService,
+
+    @Inject(forwardRef(() => LikesService))
+    private readonly likeService: LikesService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     await this.exitsUsername(createUserDto.username);
@@ -92,73 +102,44 @@ export class UsersService {
   }
 
   async getPosts(id: string, page: number = 1, limit: number = 10) {
-    await this.findOne(id);
-
-    const [posts, total] = await Promise.all([
-      this.prisma.post.findMany({
-        where: { authorId: id },
-        select: POST_SELECT, 
-        orderBy: POST_ORDERBY.NEWEST, 
-        ...getPagination(page, limit)
-      }),
-      this.prisma.post.count({
-        where: { authorId: id },
-      })
-    ]);
-    
-    const totalPage = getTotalPage(total, limit);
-
-    // const { password, ...rusult } = user;
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, /*user: rusult,*/ posts, 
-      page, limit, total, totalPage };
+    return await this.postService.getPostsByUser(id, page, limit);
   }
 
   async getMedia(id: string, page: number = 1, limit: number = 10) {
+    return await this.postService.getMediaByUser(id, page, limit);
+  }
+
+  async getLikesByUser(id: string, page: number = 1, limit: number = 10) {
     await this.findOne(id);
-
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      include: { 
-        posts: { 
-          select: { images: true }, 
-          orderBy: POST_ORDERBY.NEWEST 
-        }
-      },
-    });
-
-    const media: string[] = [];
-    user?.posts.forEach(post => post.images.forEach(image => media.push(image.imgUrl)));
-
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, media: media };
+    const likes = await this.likeService.findByUser(id, page, limit);
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, likes: likes }
   }
 
   async uploadProfileImage(auth: AuthRequest, file: Express.Multer.File) {
     if (!file) throw new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST);
 
-    const filename = `${domainConstants.domain}:${portConstants.port}/${uploadConstans.profileDir}/${file.filename}`;
     const uploadedUser = await this.prisma.user.update({
       where: { id: auth.id },
       data: {
-        profileImgUrl: filename,
+        profileImgUrl: getImageUploadUrl(file),
       }
     });
 
-    const { password, ...rusult } = uploadedUser;
-    return { messages: COMMON_MESSAGES.SUCCESS.UPLOAD, user: rusult };
+    const { password, ...result } = uploadedUser;
+    return { messages: COMMON_MESSAGES.SUCCESS.UPLOAD, user: result };
   }
   
   async uploadHeaderImage(auth: AuthRequest, file: Express.Multer.File) {
     if (!file) throw new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST);
 
-    const filename = `${domainConstants.domain}:${portConstants.port}/${uploadConstans.headerDir}/${file.filename}`;
     const uploadedUser = await this.prisma.user.update({
       where: { id: auth.id },
       data: {
-        headerImgUrl: filename,
+        headerImgUrl: getImageUploadUrl(file),
       }
     });
 
-    const { password, ...rusult } = uploadedUser;
-    return { messages: COMMON_MESSAGES.SUCCESS.UPLOAD, user: rusult };
+    const { password, ...result } = uploadedUser;
+    return { messages: COMMON_MESSAGES.SUCCESS.UPLOAD, user: result };
   }
 }
