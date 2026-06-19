@@ -89,11 +89,10 @@ export class PostsService {
   async getMediaByUser(userId: string, page: number = 1, limit: number = 5) {
     await this.userService.findOne(userId);
 
-    const [posts, total] = await Promise.all([
-      this.prisma.post.findMany({
-        where: { authorId: userId, AND: { images: { some: {} }}},
-        select: { images: { select: { imgUrl: true }}},
-        orderBy: POST_ORDERBY.NEWEST,
+    const [images, total] = await Promise.all([
+      this.prisma.postImage.findMany({
+        where: { post: { authorId: userId }},
+        select: POST_IMAGE_SELECT,
         ...getPagination(page, limit),
       }),
       this.prisma.post.count({
@@ -103,10 +102,7 @@ export class PostsService {
 
     const totalPage = getTotalPage(total, limit);
 
-    const media: string[] = [];
-    posts.forEach(post => post.images.forEach(image => media.push(image.imgUrl)));
-
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, /*user: result,*/ media, 
+    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, /*user: result,*/ media: images, 
       page, limit, total, totalPage };
   }
 

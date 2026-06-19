@@ -14,7 +14,7 @@ import { USER_SELECT } from '../users/user.select';
 export class LikesService {
   constructor(private readonly prisma: PrismaService,
 
-    @Inject(forwardRef(() => PostsService))
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
 
     @Inject(forwardRef(() => PostsService))
