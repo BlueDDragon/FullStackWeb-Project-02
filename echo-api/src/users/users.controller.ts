@@ -12,6 +12,7 @@ import { uploadConstants } from '../common/constants';
 import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 import { UploadImagesDto } from './dto/upload-image.dto';
 import { PostsService } from '../posts/posts.service';
+import { cleanupOnError } from '../common/upload.util';
 
 @ApiTags('User')
 @Controller('users')
@@ -86,7 +87,8 @@ export class UsersController {
   uploadProfileImage(
     @CurrentAuth() auth: AuthRequest,
     @UploadedFile() file: Express.Multer.File) {
-      return this.usersService.uploadProfileImage(auth, file);
+    return cleanupOnError([file], () => 
+      this.usersService.uploadProfileImage(auth, file));
   }
 
   @Post('me/header-image')
@@ -99,6 +101,7 @@ export class UsersController {
   uploadHeaderImage(
     @CurrentAuth() auth: AuthRequest,
     @UploadedFile() file: Express.Multer.File) {
-      return this.usersService.uploadHeaderImage(auth, file);
+    return cleanupOnError([file], () => 
+      this.usersService.uploadHeaderImage(auth, file));
   }
 }

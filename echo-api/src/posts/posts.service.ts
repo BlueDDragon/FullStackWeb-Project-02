@@ -6,10 +6,12 @@ import { UsersService } from '../users/users.service';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { POST_IMAGE_SELECT, POST_ORDERBY, POST_SELECT } from './post.select';
 import { getPagination, getTotalPage } from '../pagination/pagination';
-import { getImageId, getImageUploadUrl } from '../common/upload.config';
-import { existsSync, unlinkSync } from 'fs';
-import { parse } from 'path';
+import { getImageId, getImageUploadUrl, removeOldFiles } from '../common/upload.util';
+import { existsSync } from 'fs';
+import { join, parse } from 'path';
 import { LikesService } from '../likes/likes.service';
+import { unlink } from 'fs/promises';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostsService {
@@ -51,52 +53,72 @@ export class PostsService {
     if (createPostDto.rootPostId) await this.findOne(createPostDto.rootPostId);
     if (createPostDto.parentPostId) await this.findOne(createPostDto.parentPostId);
 
-    let createdPost = await this.prisma.post.create({
-      data: {
-        ...createPostDto,
-        authorId: auth.id,
+    const createdPostId = await this.prisma.$transaction(async (tx) => {
+      const createdPost = await tx.post.create({
+        data: {
+          ...createPostDto,
+          authorId: auth.id,
+        }
+      });
+
+      if (!createPostDto.rootPostId) {
+        await tx.post.update({
+          where: { id: createdPost.id },
+          data: { rootPostId: createdPost.id },
+        });
       }
+
+      await this.uploadPostImagesTx(tx, createdPost.id, files);
+      return createdPost.id;
     });
 
-    if (!createPostDto.rootPostId) {
-      createdPost = await this.prisma.post.update({
-        where: { id: createdPost.id },
-        data: { rootPostId: createdPost.id },
-      });
-    }
-
-    const uploadedImages = await this.uploadPostImages(createdPost.id, auth, files);
-    const resultPost = { ...createdPost, images: uploadedImages, };
-
+    const resultPost = await this.findOne(createdPostId);
     return { post: resultPost };
   }
 
   async update(postId: number, updatePostWithImagesDto: UpdatePostWithImagesDto, auth: AuthRequest, files: Express.Multer.File[]) {
-    const user = await this.userService.findOne(auth.id);
     const post = await this.findOne(postId);
-    if (user.id !== post.authorId) throw new UnauthorizedException();
+    if (auth.id !== post.authorId) throw new UnauthorizedException();
 
-    const { images, removeImages, ...result } = updatePostWithImagesDto;
-    const updatedPost = await this.prisma.post.update({
-      where: { id: postId },
-      data: {
-        ...result,
-      }
+    const filePathsToDelete: string[] = [];
+
+    await this.prisma.$transaction(async (tx) => {
+      const { images, removeImages, ...result } = updatePostWithImagesDto;
+      
+      await tx.post.update({
+        where: { id: postId },
+        data: {
+          ...result,
+        }
+      });
+
+      await this.uploadPostImagesTx(tx, postId, files);
+
+      const removedImages = await this.removePostImagesTx(tx, postId, removeImages);
+      filePathsToDelete.push(...(removedImages.filePaths));
     });
-
-    await this.uploadPostImages(updatedPost.id, auth, files);
-    await this.removePostImages(postId, auth, removeImages);
+    
+    await Promise.all(
+      filePathsToDelete.map(async (filePath) => {
+        try {
+          if (existsSync(filePath)) await unlink(filePath);
+        } catch {
+          console.log(`fail to image delete:`, filePath);
+        }
+      })
+    );
+    
     const resultPost = await this.findOne(postId);
-
     return { post: resultPost };
   }
 
   async remove(postId: number, auth: AuthRequest) {
-    const user = await this.userService.findOne(auth.id);
     const removedPost = await this.findOne(postId);
-    if (user.id !== removedPost.authorId) throw new UnauthorizedException();
+    if (auth.id !== removedPost.authorId) throw new UnauthorizedException();
 
     await this.prisma.post.delete({ where: { id: postId }});
+    await removeOldFiles(removedPost.images.map(img => img.imgUrl));
+
     return { post: removedPost };
   }
   
@@ -201,16 +223,12 @@ export class PostsService {
   ///
   /// 이미지 업로더
   ///
-  async uploadPostImages(postId: number, auth: AuthRequest, files: Express.Multer.File[]) {
-    if (!files || files.length === 0) return [];
-
-    const user = await this.userService.findOne(auth.id);
-    const post = await this.findOne(postId);
-    if (user.id !== post.authorId) throw new UnauthorizedException();
+  private async uploadPostImagesTx(tx: Prisma.TransactionClient, postId: number, files: Express.Multer.File[]) {
+    if (!files || files.length === 0) return { images: [] };
 
     const uploadedPosts = await Promise.all(
       files.map(file => {
-        return this.prisma.postImage.create({ 
+        return tx.postImage.create({ 
           data: {
             id: getImageId(file),
             postId: postId,
@@ -224,36 +242,38 @@ export class PostsService {
     return { images: uploadedPosts };
   }
 
-  async removePostImages(postId: number, auth: AuthRequest, filenames: string[]) {
-    if (!filenames || filenames.length === 0) return [];
-
-    const user = await this.userService.findOne(auth.id);
-    const post = await this.findOne(postId);
-    if (user.id !== post.authorId) throw new UnauthorizedException();
-
+  private async removePostImagesTx(tx: Prisma.TransactionClient, postId: number, filenames: string[]) {
+    if (!filenames || filenames.length === 0) return { removedImages: [], filePaths: [] };
+    
     const removedImages: { imgUrl: string, }[] = [];
-
+    const filePaths: string[] = [];
+    
     for (const filename of filenames) {
-      const pathname = new URL(filename).pathname;
-      // TODO : 파일 삭제 로직
-      // if (existsSync(pathname)) {
-        // unlinkSync(pathname);
+      let imageId: string;
+      
+      try {
+        imageId = parse(new URL(filename).pathname).name;
+      } catch {
+        throw new BadRequestException();
+      }
+      
+      const removedImage = 
+        await tx.postImage.findUnique({ 
+          where: { id: imageId }, 
+          select: { postId: true, imgUrl: true }
+        });
 
-        const imageId = parse(pathname).name;
-        const removedImage = 
-          await this.prisma.postImage.findUnique({ 
-            where: { id: imageId }, 
-            select: { postId: true, imgUrl: true }
-          });
-
-        if (!removedImage || removedImage.postId !== postId)
-          throw new NotFoundException();
-        
-        await this.prisma.postImage.delete({ where: { id: imageId }});
-        removedImages.push({ imgUrl: removedImage.imgUrl });
-      // }
+      if (!removedImage || removedImage.postId !== postId)
+        throw new NotFoundException();
+      
+      const pathname = new URL(removedImage.imgUrl).pathname;
+      const filePath = join(process.cwd(), pathname.replace(/^\/+/, ''));
+      
+      await tx.postImage.delete({ where: { id: imageId }});
+      removedImages.push({ imgUrl: removedImage.imgUrl });
+      filePaths.push(filePath);
     }
 
-    return { images: removedImages };
+    return { removedImages: removedImages, filePaths };
   }
 }

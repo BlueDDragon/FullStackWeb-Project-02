@@ -23,8 +23,8 @@ model User {
   likes   PostLike[]
   folders BookmarkFolder[]
 
-  followers  Follow[] @relation("Follower")
-  followings Follow[] @relation("Following")
+  followers  Follow[] @relation("Following")
+  followings Follow[] @relation("Follower")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -32,10 +32,10 @@ model User {
 
 model Follow {
   followerId String
-  follower   User   @relation("Follower", fields: [followerId], references: [id])
+  follower   User   @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
 
   followingId String
-  following   User   @relation("Following", fields: [followingId], references: [id])
+  following   User   @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
 
   isMuted    Boolean @default(false)
   isFavorite Boolean @default(false)
@@ -43,6 +43,7 @@ model Follow {
   createdAt DateTime @default(now())
 
   @@id([followerId, followingId], name: "followId")
+  @@index([followingId])
 }
 
 enum PostState {
@@ -60,22 +61,32 @@ model Post {
   content String
 
   authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   rootPostId Int?
-  rootPost   Post?  @relation("RootPost", fields: [rootPostId], references: [id])
-  rootOf     Post[] @relation("RootPost")
+  // rootPost   Post?  @relation("RootPost", fields: [rootPostId], references: [id], onDelete: SetNull)
+  // rootOf     Post[] @relation("RootPost")
 
   parentPostId Int?
-  parentPost   Post?  @relation("ParentPost", fields: [parentPostId], references: [id])
+  parentPost   Post?  @relation("ParentPost", fields: [parentPostId], references: [id], onDelete: SetNull)
   replies      Post[] @relation("ParentPost")
 
   images    PostImage[]
   likes     PostLike[]
   bookmarks Bookmark[]
 
+  // TODO : 개수 저장 로직
+  likeCount     Int @default(0)
+  replyCount    Int @default(0)
+  bookmarkCount Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([rootPostId])
+  @@index([parentPostId])
+  @@index([createdAt])
 }
 
 model PostImage {
@@ -83,34 +94,34 @@ model PostImage {
   imgUrl String
 
   postId Int
-  post   Post @relation(fields: [postId], references: [id])
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model PostLike {
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   postId Int
-  post   Post   @relation(fields: [postId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId], name: "likeId")
 }
 
 model BookmarkFolder {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
-  description String
+  description String?
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   bookmarks Bookmark[]
 }
 
 model Bookmark {
   folderId String
-  folder   BookmarkFolder @relation(fields: [folderId], references: [id])
+  folder   BookmarkFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
   postId   Int
-  post     Post           @relation(fields: [postId], references: [id])
+  post     Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([folderId, postId], name: "bookmarkId")
 }

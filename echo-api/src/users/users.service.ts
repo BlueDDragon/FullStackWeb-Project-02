@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
 import * as bcrypt from 'bcrypt';
 import { bcryptConstants } from '../common/constants';
-import { getImageUploadUrl } from '../common/upload.config';
+import { getImageUploadUrl, removeOldFile, removeOldFiles } from '../common/upload.util';
 import { LikesService } from '../likes/likes.service';
 
 @Injectable()
@@ -90,8 +90,22 @@ export class UsersService {
   async remove(id: string, auth: AuthRequest) {
     if (id !== auth.id) throw new UnauthorizedException();
 
-    const removedUser = await this.findOne(id);
+    const removedUser = await this.prisma.user.findUnique({
+      where: { id },
+      include: { posts: {
+          include: { images: { select: { imgUrl: true }} }
+        }}
+    });
+    if (!removedUser) throw new NotFoundException();
+
     await this.prisma.user.delete({ where: { id }});
+
+    const postImgUrls = removedUser.posts.flatMap(post => post.images.map(img => img.imgUrl));
+    await Promise.allSettled([
+      removeOldFiles(postImgUrls), 
+      removeOldFile(removedUser.profileImgUrl), 
+      removeOldFile(removedUser.headerImgUrl)
+    ]);
 
     const { password, ...result } = removedUser;
     return { user: result };
@@ -112,12 +126,16 @@ export class UsersService {
   async uploadProfileImage(auth: AuthRequest, file: Express.Multer.File) {
     if (!file) throw new BadRequestException();
 
+    const prevUser = await this.findOne(auth.id);
+
     const uploadedUser = await this.prisma.user.update({
       where: { id: auth.id },
       data: {
         profileImgUrl: getImageUploadUrl(file),
       }
     });
+
+    await removeOldFile(prevUser.profileImgUrl);
 
     const { password, ...result } = uploadedUser;
     return { user: result };
@@ -126,12 +144,16 @@ export class UsersService {
   async uploadHeaderImage(auth: AuthRequest, file: Express.Multer.File) {
     if (!file) throw new BadRequestException();
 
+    const prevUser = await this.findOne(auth.id);
+
     const uploadedUser = await this.prisma.user.update({
       where: { id: auth.id },
       data: {
         headerImgUrl: getImageUploadUrl(file),
       }
     });
+    
+    await removeOldFile(prevUser.headerImgUrl);
 
     const { password, ...result } = uploadedUser;
     return { user: result };

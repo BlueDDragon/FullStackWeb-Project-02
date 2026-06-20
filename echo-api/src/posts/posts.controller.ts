@@ -10,6 +10,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { uploadConstants } from '../common/constants';
 import { createImageUploadOptions } from '../common/upload.config';
 import { QueryPaginationDto } from '../pagination/query-pagination.dto';
+import { unlink } from 'fs/promises';
+import { cleanupOnError } from '../common/upload.util';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -26,11 +28,12 @@ export class PostsController {
   @ApiBody({ type: CreatePostWithImagesDto })
   @UseInterceptors(FilesInterceptor('images', 4, createImageUploadOptions(uploadConstants.postDir)))
   @ApiOperation({ summary: "게시글 작성" })
-  create(
+  async create(
     @Body() createPostDto: CreatePostDto,
     @CurrentAuth() auth: AuthRequest,
     @UploadedFiles() files: Express.Multer.File[]) {
-    return this.postsService.create(createPostDto, auth, files);
+    return cleanupOnError(files, () =>
+      this.postsService.create(createPostDto, auth, files));
   }
   
   @Patch(':postId')
@@ -40,12 +43,13 @@ export class PostsController {
   @ApiBody({ type: UpdatePostWithImagesDto })
   @UseInterceptors(FilesInterceptor('images', 4, createImageUploadOptions(uploadConstants.postDir)))
   @ApiOperation({ summary: "게시글 수정" })
-  update(
+  async update(
     @Param('postId', ParseIntPipe) postId: number, 
     @Body() updatePostWithImagesDto: UpdatePostWithImagesDto,
     @CurrentAuth() auth: AuthRequest,
     @UploadedFiles() files: Express.Multer.File[]) {
-    return this.postsService.update(postId, updatePostWithImagesDto, auth, files);
+    return cleanupOnError(files, () =>
+      this.postsService.update(postId, updatePostWithImagesDto, auth, files));
   }
 
   @Delete(':postId')
