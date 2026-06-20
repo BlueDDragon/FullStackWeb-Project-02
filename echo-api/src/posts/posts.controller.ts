@@ -74,9 +74,8 @@ export class PostsController {
   @Get(':postId/thread')
   @ApiOperation({ summary: "게시글 목록 조회 (스레드 형태)" })
   getThread(
-    @Param('postId', ParseIntPipe) postId: number,
-    @Query() query: QueryPaginationDto) {
-    return this.postsService.getThread(postId, query.page, query.limit);
+    @Param('postId', ParseIntPipe) postId: number) {
+    return this.postsService.getThread(postId);
   }
 
   @Get(':postId/likes')

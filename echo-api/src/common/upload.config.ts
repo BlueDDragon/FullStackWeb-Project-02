@@ -43,7 +43,7 @@ export function createImageUploadOptions(destination: string) {
             }
             callback(null, true);
         },
-        limit: { fileSize: MAX_FILE_SIZE },
+        // limit: { fileSize: MAX_FILE_SIZE },
         limits: { fileSize: MAX_FILE_SIZE },
     }
 }

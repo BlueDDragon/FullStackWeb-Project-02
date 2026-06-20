@@ -1,8 +1,14 @@
-const defaultError = (() => { throw new Error()});
+function requireEnv(key: string): string {
+  const value = process.env[key];
+  if (value === undefined || value === '') {
+    throw new Error(`Missing required env: ${key}`);
+  }
+  return value;
+}
 
 export const portConstants = {
-    port: Number(process.env.PORT) || defaultError(),
-    clientPort: Number(process.env.CLIENT_PORT) || defaultError(),
+    port: Number(requireEnv("PORT")),
+    clientPort: Number(requireEnv("CLIENT_PORT")),
 }
 
 export const domainConstants = {
@@ -11,12 +17,12 @@ export const domainConstants = {
 }
 
 export const bcryptConstants = {
-    round: Number(process.env.BCRYPT_ROUND) || defaultError(),
+    round: Number(requireEnv("BCRYPT_ROUND")),
 }
 
 export const jwtConstants = {
-    secret: process.env.JWT_SECRET || defaultError(),
-    expiresIn: process.env.JWT_EXPIRES_IN || defaultError(),
+    secret: requireEnv("JWT_SECRET"),
+    expiresIn: requireEnv("JWT_EXPIRES_IN"),
 }
 
 export const uploadConstants = {

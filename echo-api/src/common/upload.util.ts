@@ -11,8 +11,10 @@ export function getImageUploadUrl(file: Express.Multer.File) {
     return `${domainConstants.domain}:${portConstants.port}/${file.path}`;
 }
 
+const IGNORE_IMAGES = ['/profile.png', '/header.png'];
+
 export async function removeOldFile(fileUrl: string) {
-  if (!fileUrl) return;
+  if (!fileUrl || IGNORE_IMAGES.includes(fileUrl)) return;
 
   try {
     const pathname = new URL(fileUrl).pathname;

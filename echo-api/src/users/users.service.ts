@@ -7,11 +7,15 @@ import * as bcrypt from 'bcrypt';
 import { bcryptConstants } from '../common/constants';
 import { getImageUploadUrl, removeOldFile, removeOldFiles } from '../common/upload.util';
 import { LikesService } from '../likes/likes.service';
+import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService,
 
+    @Inject(forwardRef(() => PostsService))
+    private readonly postService: PostsService,
+    
     @Inject(forwardRef(() => LikesService))
     private readonly likeService: LikesService,
   ) {}
@@ -114,10 +118,19 @@ export class UsersService {
   ///
   /// 정보 조회
   ///
-  async getLikesByUser(id: string, page: number = 1, limit: number = 10) {
+  async getPosts(id: string, page: number = 1, limit: number = 10) {
     await this.findOne(id);
-    const likes = await this.likeService.findByUser(id, page, limit);
-    return { likes: likes }
+    return await this.postService.getPostsByUser(id, page, limit);
+  }
+
+  async getMedia(id: string, page: number = 1, limit: number = 10) {
+    await this.findOne(id);
+    return await this.postService.getMediaByUser(id, page, limit);
+  }
+
+  async getLikes(id: string, page: number = 1, limit: number = 10) {
+    await this.findOne(id);
+    return await this.likeService.findByUser(id, page, limit);
   }
 
   ///

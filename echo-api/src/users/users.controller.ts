@@ -17,11 +17,7 @@ import { cleanupOnError } from '../common/upload.util';
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService,
-    
-    @Inject(forwardRef(() => PostsService))
-    private readonly postService: PostsService
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
   
   ///
   /// 기본 CRUD
@@ -55,7 +51,7 @@ export class UsersController {
   getPosts(
     @Param('id') id: string,
     @Query() query: QueryPaginationDto) {
-      return this.postService.getPostsByUser(id, query.page, query.limit);
+      return this.usersService.getPosts(id, query.page, query.limit);
   }
   
   @Get(':id/media')
@@ -63,7 +59,7 @@ export class UsersController {
   getMedia(
     @Param('id') id: string,
     @Query() query: QueryPaginationDto) {
-      return this.postService.getMediaByUser(id, query.page, query.limit);
+      return this.usersService.getMedia(id, query.page, query.limit);
   }
 
   @Get(':id/likes')
@@ -71,7 +67,7 @@ export class UsersController {
   getLikesByUser(
     @Param('id') id: string,
     @Query() query: QueryPaginationDto) {
-    return this.usersService.getLikesByUser(id, query.page, query.limit);
+    return this.usersService.getLikes(id, query.page, query.limit);
   }
 
   ///

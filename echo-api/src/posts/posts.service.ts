@@ -179,20 +179,17 @@ export class PostsService {
     return { media: images, page, limit, total, totalPage };
   }
 
-  async getThread(postId: number, page: number = 1, limit: number = 10) {
+  async getThread(postId: number) {
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
         where: { rootPostId: postId },
         select: POST_SELECT,
-        orderBy: POST_ORDERBY.NEWEST,
-        ...getPagination(page, limit)
+        orderBy: POST_ORDERBY.NEWEST
       }),
       this.prisma.post.count({
         where: { rootPostId: postId },
       })
     ]);
-    
-    const totalPage = getTotalPage(total, limit);
 
     const map = new Map();
     for (const post of posts) {
@@ -211,7 +208,7 @@ export class PostsService {
       }
     }
 
-    return { posts: roots, page, limit, total, totalPage };
+    return { posts: roots };
   }
 
   async getLikesByPost(postId: number, page: number = 1, limit: number = 10) {
