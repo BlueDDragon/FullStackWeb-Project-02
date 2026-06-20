@@ -27,16 +27,25 @@ export class BookmarksController {
     @CurrentAuth() auth: AuthRequest) {
     return this.bookmarksService.createBookmarkFolder(createBookmarkFolderDto, auth);
   }
-
-  @Patch(':folderId')
+  
+  @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "북마크 폴더 조회" })
   getBookmarkFolder(
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.getBookmarkFolder(auth);
+  }
+
+  @Get(':folderId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 조회" })
+  getBookmark(
     @Param('folderId') folderId: string,
     @CurrentAuth() auth: AuthRequest,
     @Query() query: QueryPaginationDto) {
-    return this.bookmarksService.getBookmarkFolder(folderId, auth, query.page, query.limit);
+    return this.bookmarksService.getBookmark(folderId, auth, query.page, query.limit);
   }
 
   @Patch(':folderId')
@@ -74,15 +83,15 @@ export class BookmarksController {
     return this.bookmarksService.createBookmark(folderId, postId, auth);
   }
 
-  @Post(':folderId/posts/:postId')
+  @Get(':folderId/posts/:postId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "북마크 조회" })
-  getBookmark(
+  @ApiOperation({ summary: "북마크 상세 조회" })
+  getBookmarkPost(
     @Param('folderId') folderId: string,
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentAuth() auth: AuthRequest) {
-    return this.bookmarksService.getBookmark(folderId, postId, auth);
+    return this.bookmarksService.getBookmarkPost(folderId, postId, auth);
   }
 
   @Delete(':folderId/posts/:postId')

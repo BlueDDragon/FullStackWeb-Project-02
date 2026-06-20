@@ -44,8 +44,13 @@ export class BookmarksService {
 
   ///
   /// 정보 조회
-  ///  
-  async getBookmarkFolder(folderId: string, auth: AuthRequest, page: number = 1, limit = 10) {
+  ///
+  async getBookmarkFolder(auth: AuthRequest) {
+    const folders = await this.prisma.bookmarkFolder.findMany({ where: { userId: auth.id }});
+    return { folders: folders };
+  }
+
+  async getBookmark(folderId: string, auth: AuthRequest, page: number = 1, limit = 10) {
     const [folder, total] = await Promise.all([
       this.prisma.bookmarkFolder.findUnique({ 
         where: { id: folderId },
@@ -70,10 +75,10 @@ export class BookmarksService {
   
     const totalPage = getTotalPage(total, limit);
       
-    return { folder, pagination: { page, limit, total, totalPage }};
+    return { bookmark: folder.bookmarks, pagination: { page, limit, total, totalPage }};
   }
 
-  async getBookmark(folderId: string, postId: number, auth: AuthRequest) {
+  async getBookmarkPost(folderId: string, postId: number, auth: AuthRequest) {
     const bookmark = await this.prisma.bookmark.findUnique({
       where: { bookmarkId: { folderId, postId }},
       select: {
@@ -85,7 +90,7 @@ export class BookmarksService {
     if (!bookmark) throw new NotFoundException();
     if (bookmark.folder.userId !== auth.id) throw new UnauthorizedException();
     
-    return bookmark;
+    return { post: bookmark.post };
   }
 
 

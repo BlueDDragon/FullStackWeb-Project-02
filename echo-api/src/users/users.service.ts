@@ -8,6 +8,8 @@ import { bcryptConstants } from '../common/constants';
 import { getImageUploadUrl, removeOldFile, removeOldFiles } from '../common/upload.util';
 import { LikesService } from '../likes/likes.service';
 import { PostsService } from '../posts/posts.service';
+import { USER_SELECT } from './user.select';
+import { getPagination, getTotalPage } from '../pagination/pagination';
 
 @Injectable()
 export class UsersService {
@@ -170,5 +172,100 @@ export class UsersService {
 
     const { password, ...result } = uploadedUser;
     return { user: result };
+  }
+
+  ///
+  /// 팔로워/팔로잉 관리
+  ///
+  async findFollow(followerId: string, followingId: string) {
+    const follow = await this.prisma.follow.findUnique({
+      where: { followId: { followerId, followingId }},
+    });
+    if (!follow) throw new NotFoundException();
+    return follow;
+  }
+
+  async existsFollow(followerId: string, followingId: string) {
+    const follow = await this.prisma.follow.findUnique({
+      where: { followId: { followerId, followingId }},
+    });
+    if (follow) throw new ConflictException();
+  }
+
+  // auth.id → id : 팔로우 생성
+  async followUser(id: string, auth: AuthRequest) {
+    if (id === auth.id) throw new BadRequestException();
+
+    await this.findOne(id);
+    await this.existsFollow(auth.id, id);
+
+    const follow = await this.prisma.follow.create({
+      data: {
+        followerId: auth.id,
+        followingId: id,
+      }
+    });
+
+    return { follow: follow };
+  }
+
+  // followers → id : 나를 팔로우하는 목록
+  async getFollowers(id: string, page: number = 1, limit = 10) {
+    await this.findOne(id);
+
+    const [followers, total] = await Promise.all([
+      this.prisma.follow.findMany({
+        where: { followingId: id },
+        select: { follower: { select: USER_SELECT }, },
+        ...getPagination(page, limit),
+      }),
+      this.prisma.follow.count({
+        where: { followingId: id }
+      }),
+    ]);
+    
+    const totalPage = getTotalPage(total, limit);
+
+    return { followers: followers.map(f => f.follower), 
+      pagination: { page, limit, total, totalPage }};
+  }
+
+  // id → follwings : 내가 팔로우하는 목록
+  async getFollowings(id: string, page: number = 1, limit = 10) {
+    await this.findOne(id);
+
+    const [followings, total] = await Promise.all([
+      this.prisma.follow.findMany({
+        where: { followerId: id },
+        select: { following: { select: USER_SELECT } },
+        ...getPagination(page, limit),
+      }),
+      this.prisma.follow.count({
+        where: { followerId: id }
+      }),
+    ]);
+
+    const totalPage = getTotalPage(total, limit);
+
+    return { followings: followings.map(f => f.following), 
+      pagination: { page, limit, total, totalPage }};
+  }
+
+  // auth.id → id : 내가 팔로우하는 대상 삭제
+  async unfollowUser(id: string, auth: AuthRequest) {
+    const follow = await this.findFollow(auth.id, id);
+    await this.prisma.follow.delete({
+      where: { followId: { followerId: auth.id, followingId: id }},
+    });
+    return { removed: follow };
+  }
+
+  // id → auth.id : 나를 팔로우하는 대상 삭제
+  async removeFollow(id: string, auth: AuthRequest) {
+    const follow = await this.findFollow(id, auth.id);
+    await this.prisma.follow.delete({
+      where: { followId: { followerId: id, followingId: auth.id }},
+    });
+    return { removed: follow };
   }
 }

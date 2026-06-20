@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors, Query, Inject, forwardRef } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -98,5 +98,58 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File) {
     return cleanupOnError([file], () => 
       this.usersService.uploadHeaderImage(auth, file));
+  }
+
+  ///
+  /// 팔로워/팔로잉 관리
+  ///
+  @Post(':id/follow')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "팔로우 생성" })
+  createFollower(
+    @Param('id') id: string,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.usersService.followUser(id, auth);
+  }
+
+  @Get(':id/followers')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "나를 팔로우하는 목록 조회" })
+  getFollowers(
+    @Param('id') id: string,
+    @Query() query: QueryPaginationDto) {
+    return this.usersService.getFollowers(id, query.page, query.limit);
+  }
+
+  @Get(':id/followings')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "내가 팔로우하는 목록 조회" })
+  getFollowings(
+    @Param('id') id: string,
+    @Query() query: QueryPaginationDto) {
+    return this.usersService.getFollowings(id, query.page, query.limit);
+  }
+
+  @Delete(':id/follow')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "내가 팔로우하는 대상 언팔로우" })
+  unfollowUser(
+    @Param('id') id: string,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.usersService.unfollowUser(id, auth);
+  }
+
+  @Delete(':id/followers')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "나를 팔로우하는 대상 강제 언팔로우" })
+  removeFollow(
+    @Param('id') id: string,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.usersService.removeFollow(id, auth);
   }
 }
