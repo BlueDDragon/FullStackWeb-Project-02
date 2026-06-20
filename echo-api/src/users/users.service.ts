@@ -192,17 +192,17 @@ export class UsersService {
     if (follow) throw new ConflictException();
   }
 
-  // auth.id → id : 팔로우 생성
-  async followUser(id: string, auth: AuthRequest) {
-    if (id === auth.id) throw new BadRequestException();
+  // auth.id → followingId : 팔로우 생성
+  async followUser(followingId: string, auth: AuthRequest) {
+    if (followingId === auth.id) throw new BadRequestException();
 
-    await this.findOne(id);
-    await this.existsFollow(auth.id, id);
+    await this.findOne(followingId);
+    await this.existsFollow(auth.id, followingId);
 
     const follow = await this.prisma.follow.create({
       data: {
         followerId: auth.id,
-        followingId: id,
+        followingId: followingId,
       }
     });
 
@@ -230,7 +230,7 @@ export class UsersService {
       pagination: { page, limit, total, totalPage }};
   }
 
-  // id → follwings : 내가 팔로우하는 목록
+  // id → followings : 내가 팔로우하는 목록
   async getFollowings(id: string, page: number = 1, limit = 10) {
     await this.findOne(id);
 
@@ -251,20 +251,20 @@ export class UsersService {
       pagination: { page, limit, total, totalPage }};
   }
 
-  // auth.id → id : 내가 팔로우하는 대상 삭제
-  async unfollowUser(id: string, auth: AuthRequest) {
-    const follow = await this.findFollow(auth.id, id);
+  // auth.id → followingId : 내가 팔로우하는 대상 삭제
+  async unfollowUser(followingId: string, auth: AuthRequest) {
+    const follow = await this.findFollow(auth.id, followingId);
     await this.prisma.follow.delete({
-      where: { followId: { followerId: auth.id, followingId: id }},
+      where: { followId: { followerId: auth.id, followingId: followingId }},
     });
     return { removed: follow };
   }
 
-  // id → auth.id : 나를 팔로우하는 대상 삭제
-  async removeFollow(id: string, auth: AuthRequest) {
-    const follow = await this.findFollow(id, auth.id);
+  // followerId → auth.id : 나를 팔로우하는 대상 삭제
+  async removeFollow(followerId: string, auth: AuthRequest) {
+    const follow = await this.findFollow(followerId, auth.id);
     await this.prisma.follow.delete({
-      where: { followId: { followerId: id, followingId: auth.id }},
+      where: { followId: { followerId: followerId, followingId: auth.id }},
     });
     return { removed: follow };
   }

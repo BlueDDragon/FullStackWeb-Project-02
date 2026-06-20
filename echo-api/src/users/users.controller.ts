@@ -103,19 +103,17 @@ export class UsersController {
   ///
   /// 팔로워/팔로잉 관리
   ///
-  @Post(':id/follow')
+  @Post(':followingId/follow')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "팔로우 생성" })
   createFollower(
-    @Param('id') id: string,
+    @Param('followingId') followingId: string,
     @CurrentAuth() auth: AuthRequest) {
-    return this.usersService.followUser(id, auth);
+    return this.usersService.followUser(followingId, auth);
   }
 
   @Get(':id/followers')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: "나를 팔로우하는 목록 조회" })
   getFollowers(
     @Param('id') id: string,
@@ -124,8 +122,6 @@ export class UsersController {
   }
 
   @Get(':id/followings')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: "내가 팔로우하는 목록 조회" })
   getFollowings(
     @Param('id') id: string,
@@ -133,23 +129,23 @@ export class UsersController {
     return this.usersService.getFollowings(id, query.page, query.limit);
   }
 
-  @Delete(':id/follow')
+  @Delete(':followingId/follow')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "내가 팔로우하는 대상 언팔로우" })
   unfollowUser(
-    @Param('id') id: string,
+    @Param('followingId') followingId: string,
     @CurrentAuth() auth: AuthRequest) {
-    return this.usersService.unfollowUser(id, auth);
+    return this.usersService.unfollowUser(followingId, auth);
   }
 
-  @Delete(':id/followers')
+  @Delete(':followerId/followers')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "나를 팔로우하는 대상 강제 언팔로우" })
   removeFollow(
-    @Param('id') id: string,
+    @Param('followerId') followerId: string,
     @CurrentAuth() auth: AuthRequest) {
-    return this.usersService.removeFollow(id, auth);
+    return this.usersService.removeFollow(followerId, auth);
   }
 }
