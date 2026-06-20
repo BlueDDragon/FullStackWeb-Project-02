@@ -11,7 +11,6 @@ import { createImageUploadOptions } from '../common/upload.config';
 import { uploadConstants } from '../common/constants';
 import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 import { UploadImagesDto } from './dto/upload-image.dto';
-import { PostsService } from '../posts/posts.service';
 import { cleanupOnError } from '../common/upload.util';
 
 @ApiTags('User')

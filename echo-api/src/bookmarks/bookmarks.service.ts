@@ -54,7 +54,7 @@ export class BookmarksService {
 
   async updateBookmarkFolder(folderId: string, updateBookmarkFolderDto: UpdateBookmarkFolderDto, auth: AuthRequest) {
     const folder = await this.findBookmarkFolder(folderId);
-    if (folder.userId != auth.id) throw new UnauthorizedException();
+    if (folder.userId !== auth.id) throw new UnauthorizedException();
 
     const updatedFolder = await this.prisma.bookmarkFolder.update({
       where: { id: folderId },
@@ -66,7 +66,7 @@ export class BookmarksService {
 
   async removeBookmarkFolder(folderId: string, auth: AuthRequest) {
     const removedFolder = await this.findBookmarkFolder(folderId);
-    if (removedFolder.userId != auth.id) throw new UnauthorizedException();
+    if (removedFolder.userId !== auth.id) throw new UnauthorizedException();
 
     await this.prisma.bookmarkFolder.delete({ where: { id: folderId }});
 
@@ -80,7 +80,7 @@ export class BookmarksService {
     await this.userService.findOne(auth.id);
     
     const folder = await this.findBookmarkFolder(folderId);
-    if (folder.userId != auth.id) throw new UnauthorizedException();
+    if (folder.userId !== auth.id) throw new UnauthorizedException();
 
     await this.postService.findOne(postId);
     await this.existsBookmark(folderId, postId);

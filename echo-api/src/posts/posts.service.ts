@@ -213,8 +213,7 @@ export class PostsService {
 
   async getLikesByPost(postId: number, page: number = 1, limit: number = 10) {
     await this.findOne(postId);
-    const likes = await this.likeService.findByPost(postId, page, limit);
-    return { likes: likes }
+    return await this.likeService.findByPost(postId, page, limit);
   }
 
   ///
