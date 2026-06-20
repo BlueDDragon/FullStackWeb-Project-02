@@ -12,6 +12,9 @@ import { type AuthRequest } from '../auth/interfaces/auth-request.interface';
 export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 
+  ///
+  /// 기본 CRUD
+  ///
   @Post(':postId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

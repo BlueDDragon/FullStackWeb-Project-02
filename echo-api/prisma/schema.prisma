@@ -67,7 +67,7 @@ model Post {
   rootOf     Post[] @relation("RootPost")
 
   parentPostId Int?
-  parentPost   Post?  @relation("ParentPost", fields: [rootPostId], references: [id])
+  parentPost   Post?  @relation("ParentPost", fields: [parentPostId], references: [id])
   replies      Post[] @relation("ParentPost")
 
   images    PostImage[]

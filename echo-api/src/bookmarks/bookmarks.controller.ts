@@ -13,55 +13,63 @@ import { UpdateBookmarkFolderDto } from './dto/update-bookmark-folder.dto';
 @Controller('bookmarks')
 export class BookmarksController {
   constructor(private readonly bookmarksService: BookmarksService) {}
-    @Post()
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: "북마크 폴더 작성" })
-    createBookmarkFolder(
-      @Body() createBookmarkFolderDto: CreateBookmarkFolderDto,
-      @CurrentAuth() auth: AuthRequest) {
-      return this.bookmarksService.createBookmarkFolder(createBookmarkFolderDto, auth);
-    }
-  
-    @Patch(':folderId')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: "북마크 폴더 수정" })
-    updateBookmarkFolder(
-      @Param('folderId') folderId: string, 
-      @Body() updateBookmarkFolderDto: UpdateBookmarkFolderDto,
-      @CurrentAuth() auth: AuthRequest) {
-      return this.bookmarksService.updateBookmarkFolder(folderId, updateBookmarkFolderDto, auth);
-    }
-  
-    @Delete(':folderId')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: "북마크 폴더 삭제" })
-    removeBookmarkFolder(
-      @Param('folderId') folderId: string,
-      @CurrentAuth() auth: AuthRequest) {
-      return this.bookmarksService.removeBookmarkFolder(folderId, auth);
-    }
-    
-    @Post(':folderId/posts/:postId')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: "북마크" })
-    create(
-      @Body() createBookmarkDto: CreateBookmarkDto,
-      @CurrentAuth() auth: AuthRequest) {
-      return this.bookmarksService.createBookmark(createBookmarkDto, auth);
-    }
-  
-    @Delete(':folderId/posts/:postId')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: "북마크 삭제" })
-    remove(
-      @Param('folderId') folderId: string,
-      @Param('postId', ParseIntPipe) postId: number,
-      @CurrentAuth() auth: AuthRequest) {
-      return this.bookmarksService.removeBookmark(folderId, postId, auth);
-    }
+
+  ///
+  /// 기본 CRUD (폴더)
+  ///
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 폴더 작성" })
+  createBookmarkFolder(
+    @Body() createBookmarkFolderDto: CreateBookmarkFolderDto,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.createBookmarkFolder(createBookmarkFolderDto, auth);
+  }
+
+  @Patch(':folderId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 폴더 수정" })
+  updateBookmarkFolder(
+    @Param('folderId') folderId: string, 
+    @Body() updateBookmarkFolderDto: UpdateBookmarkFolderDto,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.updateBookmarkFolder(folderId, updateBookmarkFolderDto, auth);
+  }
+
+  @Delete(':folderId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 폴더 삭제" })
+  removeBookmarkFolder(
+    @Param('folderId') folderId: string,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.removeBookmarkFolder(folderId, auth);
+  }
+
+  ///
+  /// 기본 CRUD (북마크)
+  ///
+  @Post(':folderId/posts/:postId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크" })
+  create(
+    @Param('folderId') folderId: string,
+    @Param('postId', ParseIntPipe) postId: number,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.createBookmark(folderId, postId, auth);
+  }
+
+  @Delete(':folderId/posts/:postId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 삭제" })
+  remove(
+    @Param('folderId') folderId: string,
+    @Param('postId', ParseIntPipe) postId: number,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.removeBookmark(folderId, postId, auth);
+  }
 }

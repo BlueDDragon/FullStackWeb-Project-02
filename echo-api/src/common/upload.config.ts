@@ -2,7 +2,6 @@ import { diskStorage } from 'multer';
 import { extname, parse } from 'path';
 import { randomUUID } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
-import { COMMON_MESSAGES } from './messages';
 import { domainConstants, portConstants, uploadConstants } from './constants';
 
 export const ALLOWED_MINE = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -20,7 +19,7 @@ export const MAX_FILE_SIZE = 5 * 1024 * 1024;
 //     }),
 //     fileFilter:(_req, file, callback) => {
 //         if (!ALLOWED_MINE.includes(file.mimetype)) {
-//             callback(new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST), false);
+//             callback(new BadRequestException(), false);
 //             return;
 //         }
 //         callback(null, true);
@@ -40,7 +39,7 @@ export function createImageUploadOptions(destination: string) {
         }),
         fileFilter:(_req, file, callback) => {
             if (!ALLOWED_MINE.includes(file.mimetype)) {
-                callback(new BadRequestException(COMMON_MESSAGES.ERROR.BAD_REQUEST), false);
+                callback(new BadRequestException(), false);
                 return;
             }
             callback(null, true);

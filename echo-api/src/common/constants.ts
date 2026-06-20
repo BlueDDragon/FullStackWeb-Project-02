@@ -1,19 +1,22 @@
+const defaultError = (() => { throw new Error()});
+
 export const portConstants = {
-    port: process.env.PORT ?? 3001,
-    clientPort: process.env.CLIENT_PORT ?? 3000,
+    port: Number(process.env.PORT) || defaultError(),
+    clientPort: Number(process.env.CLIENT_PORT) || defaultError(),
 }
 
 export const domainConstants = {
     domain: `http://localhost`,
+    clientDomain: ``,
 }
 
 export const bcryptConstants = {
-    round: process.env.BCRYPT_ROUND ?? 10,
+    round: Number(process.env.BCRYPT_ROUND) || defaultError(),
 }
 
 export const jwtConstants = {
-    secret: process.env.JWT_SECRET ?? "dev-secret-change-me",
-    expiresIn: process.env.JWT_EXPIRES_IN ?? '1h',
+    secret: process.env.JWT_SECRET || defaultError(),
+    expiresIn: process.env.JWT_EXPIRES_IN || defaultError(),
 }
 
 export const uploadConstants = {

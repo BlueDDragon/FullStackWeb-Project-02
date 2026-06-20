@@ -16,6 +16,9 @@ import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
   
+  ///
+  /// 기본 CRUD
+  ///
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -30,28 +33,6 @@ export class PostsController {
     return this.postsService.create(createPostDto, auth, files);
   }
   
-  @Get('')
-  @ApiOperation({ summary: "게시글 목록 조회" })
-  findAll(@Query() query: QueryPaginationDto) {
-    return this.postsService.getPosts(query.page, query.limit);
-  }
-  
-  @Get(':postId/thread')
-  @ApiOperation({ summary: "게시글 목록 조회 (스레드 형태)" })
-  findThread(
-    @Param('postId', ParseIntPipe) postId: number,
-    @Query() query: QueryPaginationDto) {
-    return this.postsService.getThread(postId, query.page, query.limit);
-  }
-
-  @Get(':postId/likes')
-  @ApiOperation({ summary: "게시글 좋아요 목록 조회" })
-  getLikesByUser(
-    @Param('postId', ParseIntPipe) postId: number,
-    @Query() query: QueryPaginationDto) {
-    return this.postsService.getLikesByPost(postId, query.page, query.limit);
-  }
-
   @Patch(':postId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -75,5 +56,30 @@ export class PostsController {
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentAuth() auth: AuthRequest) {
     return this.postsService.remove(postId, auth);
+  }
+  
+  ///
+  /// 정보 조회
+  ///
+  @Get('')
+  @ApiOperation({ summary: "게시글 목록 조회" })
+  getPosts(@Query() query: QueryPaginationDto) {
+    return this.postsService.getPosts(query.page, query.limit);
+  }
+  
+  @Get(':postId/thread')
+  @ApiOperation({ summary: "게시글 목록 조회 (스레드 형태)" })
+  getThread(
+    @Param('postId', ParseIntPipe) postId: number,
+    @Query() query: QueryPaginationDto) {
+    return this.postsService.getThread(postId, query.page, query.limit);
+  }
+
+  @Get(':postId/likes')
+  @ApiOperation({ summary: "게시글 좋아요 목록 조회" })
+  getLikesByUser(
+    @Param('postId', ParseIntPipe) postId: number,
+    @Query() query: QueryPaginationDto) {
+    return this.postsService.getLikesByPost(postId, query.page, query.limit);
   }
 }

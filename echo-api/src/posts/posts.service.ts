@@ -3,7 +3,6 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto, UpdatePostWithImagesDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { COMMON_MESSAGES, POST_MESSAGES } from '../common/messages';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { POST_IMAGE_SELECT, POST_ORDERBY, POST_SELECT } from './post.select';
 import { getPagination, getTotalPage } from '../pagination/pagination';
@@ -23,6 +22,29 @@ export class PostsService {
     private readonly likeService: LikesService,
   ) {}
 
+  ///
+  /// 생성/중복 조회
+  ///
+  async findOne(postId: number) {
+    const post = await this.prisma.post.findUnique({ 
+      where: { id: postId },
+      select: POST_SELECT,
+    });
+    if (!post) throw new NotFoundException();
+    return post;
+  }
+
+  async existsPost(postId: number) {
+    const post = await this.prisma.post.findUnique({ 
+      where: { id: postId },
+      select: POST_SELECT,
+    });
+    if (post) throw new ConflictException();
+  }
+
+  ///
+  /// 기본 CRUD
+  ///
   async create(createPostDto: CreatePostDto, auth: AuthRequest, files: Express.Multer.File[]) {
     await this.userService.findOne(auth.id);
 
@@ -44,11 +66,43 @@ export class PostsService {
     }
 
     const uploadedImages = await this.uploadPostImages(createdPost.id, auth, files);
-    const resultPost = { ...createdPost, images: [...uploadedImages], };
+    const resultPost = { ...createdPost, images: uploadedImages, };
 
-    return { messages: POST_MESSAGES.SUCCESS.CREATE_POST, post: resultPost };
+    return { post: resultPost };
   }
 
+  async update(postId: number, updatePostWithImagesDto: UpdatePostWithImagesDto, auth: AuthRequest, files: Express.Multer.File[]) {
+    const user = await this.userService.findOne(auth.id);
+    const post = await this.findOne(postId);
+    if (user.id !== post.authorId) throw new UnauthorizedException();
+
+    const { images, removeImages, ...result } = updatePostWithImagesDto;
+    const updatedPost = await this.prisma.post.update({
+      where: { id: postId },
+      data: {
+        ...result,
+      }
+    });
+
+    await this.uploadPostImages(updatedPost.id, auth, files);
+    await this.removePostImages(postId, auth, removeImages);
+    const resultPost = await this.findOne(postId);
+
+    return { post: resultPost };
+  }
+
+  async remove(postId: number, auth: AuthRequest) {
+    const user = await this.userService.findOne(auth.id);
+    const removedPost = await this.findOne(postId);
+    if (user.id !== removedPost.authorId) throw new UnauthorizedException();
+
+    await this.prisma.post.delete({ where: { id: postId }});
+    return { post: removedPost };
+  }
+  
+  ///
+  /// 정보 조회
+  ///
   async getPosts(page: number = 1, limit: number = 10) {
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
@@ -61,8 +115,7 @@ export class PostsService {
     
     const totalPage = getTotalPage(total, limit);
 
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, posts: posts, 
-      page, limit, total, totalPage };
+    return { posts: posts, page, limit, total, totalPage };
   }
 
   async getPostsByUser(userId: string, page: number = 1, limit: number = 10) {
@@ -82,8 +135,7 @@ export class PostsService {
     
     const totalPage = getTotalPage(total, limit);
 
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, /*user: result,*/ posts, 
-      page, limit, total, totalPage };
+    return { posts: posts, page, limit, total, totalPage };
   }
 
   async getMediaByUser(userId: string, page: number = 1, limit: number = 5) {
@@ -102,8 +154,7 @@ export class PostsService {
 
     const totalPage = getTotalPage(total, limit);
 
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, /*user: result,*/ media: images, 
-      page, limit, total, totalPage };
+    return { media: images, page, limit, total, totalPage };
   }
 
   async getThread(postId: number, page: number = 1, limit: number = 10) {
@@ -138,68 +189,24 @@ export class PostsService {
       }
     }
 
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, posts: roots, 
-      page, limit, total, totalPage };
+    return { posts: roots, page, limit, total, totalPage };
   }
 
   async getLikesByPost(postId: number, page: number = 1, limit: number = 10) {
     await this.findOne(postId);
     const likes = await this.likeService.findByPost(postId, page, limit);
-    return { messages: POST_MESSAGES.SUCCESS.FIND_POSTS, likes: likes }
+    return { likes: likes }
   }
 
-  async findOne(postId: number) {
-    const post = await this.prisma.post.findUnique({ 
-      where: { id: postId },
-      select: POST_SELECT,
-    });
-    if (!post) throw new NotFoundException(POST_MESSAGES.ERROR.NOT_FOUND_POST);
-    return post;
-  }
-
-  async exitsPost(postId: number) {
-    const post = await this.prisma.post.findUnique({ 
-      where: { id: postId },
-      select: POST_SELECT,
-    });
-    if (post) throw new ConflictException(COMMON_MESSAGES.ERROR.CONFLICT);
-  }
-
-  async update(postId: number, updatePostWithImagesDto: UpdatePostWithImagesDto, auth: AuthRequest, files: Express.Multer.File[]) {
-    const user = await this.userService.findOne(auth.id);
-    const post = await this.findOne(postId);
-    if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
-
-    const { images, removeImages, ...result } = updatePostWithImagesDto;
-    const updatedPost = await this.prisma.post.update({
-      where: { id: postId },
-      data: {
-        ...result,
-      }
-    });
-
-    const uploadedImages = await this.uploadPostImages(updatedPost.id, auth, files);
-    const removedImages = await this.removePostImages(postId, auth, removeImages);
-    const resultPost = await this.findOne(postId);
-
-    return { messages: POST_MESSAGES.SUCCESS.UPDATE_POST, post: resultPost, removed: removedImages };
-  }
-
-  async remove(postId: number, auth: AuthRequest) {
-    const user = await this.userService.findOne(auth.id);
-    const removedPost = await this.findOne(postId);
-    if (user.id !== removedPost.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
-
-    await this.prisma.post.delete({ where: { id: postId }});
-    return { messages: POST_MESSAGES.SUCCESS.DELETE_POST, post: removedPost };
-  }
-  
+  ///
+  /// 이미지 업로더
+  ///
   async uploadPostImages(postId: number, auth: AuthRequest, files: Express.Multer.File[]) {
     if (!files || files.length === 0) return [];
 
     const user = await this.userService.findOne(auth.id);
     const post = await this.findOne(postId);
-    if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+    if (user.id !== post.authorId) throw new UnauthorizedException();
 
     const uploadedPosts = await Promise.all(
       files.map(file => {
@@ -214,7 +221,7 @@ export class PostsService {
       })
     );
 
-    return uploadedPosts;
+    return { images: uploadedPosts };
   }
 
   async removePostImages(postId: number, auth: AuthRequest, filenames: string[]) {
@@ -222,12 +229,13 @@ export class PostsService {
 
     const user = await this.userService.findOne(auth.id);
     const post = await this.findOne(postId);
-    if (user.id !== post.authorId) throw new UnauthorizedException(COMMON_MESSAGES.ERROR.UNAUTHORIZED);
+    if (user.id !== post.authorId) throw new UnauthorizedException();
 
     const removedImages: { imgUrl: string, }[] = [];
 
     for (const filename of filenames) {
       const pathname = new URL(filename).pathname;
+      // TODO : 파일 삭제 로직
       // if (existsSync(pathname)) {
         // unlinkSync(pathname);
 
@@ -238,7 +246,8 @@ export class PostsService {
             select: { postId: true, imgUrl: true }
           });
 
-        if (!removedImage || removedImage.postId != postId) return;
+        if (!removedImage || removedImage.postId !== postId)
+          throw new NotFoundException();
         
         await this.prisma.postImage.delete({ where: { id: imageId }});
         removedImages.push({ imgUrl: removedImage.imgUrl });

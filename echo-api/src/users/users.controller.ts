@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors, Query, Inject, forwardRef } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,12 +11,20 @@ import { createImageUploadOptions } from '../common/upload.config';
 import { uploadConstants } from '../common/constants';
 import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 import { UploadImagesDto } from './dto/upload-image.dto';
+import { PostsService } from '../posts/posts.service';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService,
+    
+    @Inject(forwardRef(() => PostsService))
+    private readonly postService: PostsService
+  ) {}
   
+  ///
+  /// 기본 CRUD
+  ///
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -38,12 +46,15 @@ export class UsersController {
     return this.usersService.remove(id, auth);
   }
 
+  ///
+  /// 정보 조회
+  ///
   @Get(':id/posts')
   @ApiOperation({ summary: "사용자 게시글 목록 조회" })
   getPosts(
     @Param('id') id: string,
     @Query() query: QueryPaginationDto) {
-      return this.usersService.getPosts(id, query.page, query.limit);
+      return this.postService.getPostsByUser(id, query.page, query.limit);
   }
   
   @Get(':id/media')
@@ -51,7 +62,7 @@ export class UsersController {
   getMedia(
     @Param('id') id: string,
     @Query() query: QueryPaginationDto) {
-      return this.usersService.getMedia(id, query.page, query.limit);
+      return this.postService.getMediaByUser(id, query.page, query.limit);
   }
 
   @Get(':id/likes')
@@ -62,6 +73,9 @@ export class UsersController {
     return this.usersService.getLikesByUser(id, query.page, query.limit);
   }
 
+  ///
+  /// 이미지 업로더
+  ///
   @Post('me/profile-image')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
