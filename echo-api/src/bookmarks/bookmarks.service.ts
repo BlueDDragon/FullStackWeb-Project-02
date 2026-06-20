@@ -7,6 +7,9 @@ import { PostsService } from '../posts/posts.service';
 import { CreateBookmarkFolderDto } from './dto/create-bookmark-folder.dto';
 import { UpdateBookmarkFolderDto } from './dto/update-bookmark-folder.dto';
 import { AuthRequest } from '../auth/interfaces/auth-request.interface';
+import { USER_SELECT } from '../users/user.select';
+import { POST_SELECT } from '../posts/post.select';
+import { getPagination, getTotalPage } from '../pagination/pagination';
 
 @Injectable()
 export class BookmarksService {
@@ -27,7 +30,7 @@ export class BookmarksService {
     if (!folder) throw new NotFoundException();
     return folder;
   }
-
+  
   async findBookmark(folderId: string, postId: number) {
     const bookmark = await this.prisma.bookmark.findUnique({ where: { bookmarkId: { folderId, postId } }});
     if (!bookmark) throw new NotFoundException();
@@ -38,6 +41,53 @@ export class BookmarksService {
     const bookmark = await this.prisma.bookmark.findUnique({ where: { bookmarkId: { folderId, postId } }});
     if (bookmark) throw new ConflictException();
   }
+
+  ///
+  /// 정보 조회
+  ///  
+  async getBookmarkFolder(folderId: string, auth: AuthRequest, page: number = 1, limit = 10) {
+    const [folder, total] = await Promise.all([
+      this.prisma.bookmarkFolder.findUnique({ 
+        where: { id: folderId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          userId: true,
+          bookmarks: { 
+            select: { post: { select: POST_SELECT }},
+            ...getPagination(page, limit),
+          },
+        },
+      }),
+      this.prisma.bookmark.count({
+        where: { folderId: folderId },
+      }),
+    ]);
+    
+    if (!folder) throw new NotFoundException();
+    if (folder.userId !== auth.id) throw new UnauthorizedException();
+  
+    const totalPage = getTotalPage(total, limit);
+      
+    return { folder, pagination: { page, limit, total, totalPage }};
+  }
+
+  async getBookmark(folderId: string, postId: number, auth: AuthRequest) {
+    const bookmark = await this.prisma.bookmark.findUnique({
+      where: { bookmarkId: { folderId, postId }},
+      select: {
+        folder: { select: { userId: true }},
+        post: { select: POST_SELECT }
+      }
+    })
+
+    if (!bookmark) throw new NotFoundException();
+    if (bookmark.folder.userId !== auth.id) throw new UnauthorizedException();
+    
+    return bookmark;
+  }
+
 
   ///
   /// 기본 CRUD (폴더)

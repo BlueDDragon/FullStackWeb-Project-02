@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe, Query } from '@nestjs/common';
 import { BookmarksService } from './bookmarks.service';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto';
@@ -8,6 +8,7 @@ import { CreateBookmarkFolderDto } from './dto/create-bookmark-folder.dto';
 import { CurrentAuth } from '../auth/decorators/current-auth.decorator';
 import { type AuthRequest } from '../auth/interfaces/auth-request.interface';
 import { UpdateBookmarkFolderDto } from './dto/update-bookmark-folder.dto';
+import { QueryPaginationDto } from '../pagination/query-pagination.dto';
 
 @ApiTags('BookMark')
 @Controller('bookmarks')
@@ -25,6 +26,17 @@ export class BookmarksController {
     @Body() createBookmarkFolderDto: CreateBookmarkFolderDto,
     @CurrentAuth() auth: AuthRequest) {
     return this.bookmarksService.createBookmarkFolder(createBookmarkFolderDto, auth);
+  }
+
+  @Patch(':folderId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 폴더 조회" })
+  getBookmarkFolder(
+    @Param('folderId') folderId: string,
+    @CurrentAuth() auth: AuthRequest,
+    @Query() query: QueryPaginationDto) {
+    return this.bookmarksService.getBookmarkFolder(folderId, auth, query.page, query.limit);
   }
 
   @Patch(':folderId')
@@ -60,6 +72,17 @@ export class BookmarksController {
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentAuth() auth: AuthRequest) {
     return this.bookmarksService.createBookmark(folderId, postId, auth);
+  }
+
+  @Post(':folderId/posts/:postId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "북마크 조회" })
+  getBookmark(
+    @Param('folderId') folderId: string,
+    @Param('postId', ParseIntPipe) postId: number,
+    @CurrentAuth() auth: AuthRequest) {
+    return this.bookmarksService.getBookmark(folderId, postId, auth);
   }
 
   @Delete(':folderId/posts/:postId')

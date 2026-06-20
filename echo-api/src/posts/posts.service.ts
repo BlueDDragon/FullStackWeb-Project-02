@@ -137,7 +137,7 @@ export class PostsService {
     
     const totalPage = getTotalPage(total, limit);
 
-    return { posts: posts, page, limit, total, totalPage };
+    return { posts: posts, pagination: { page, limit, total, totalPage }};
   }
 
   async getPostsByUser(userId: string, page: number = 1, limit: number = 10) {
@@ -157,7 +157,7 @@ export class PostsService {
     
     const totalPage = getTotalPage(total, limit);
 
-    return { posts: posts, page, limit, total, totalPage };
+    return { posts: posts, pagination: { page, limit, total, totalPage }};
   }
 
   async getMediaByUser(userId: string, page: number = 1, limit: number = 5) {
@@ -176,7 +176,7 @@ export class PostsService {
 
     const totalPage = getTotalPage(total, limit);
 
-    return { media: images, page, limit, total, totalPage };
+    return { media: images, pagination: { page, limit, total, totalPage }};
   }
 
   async getThread(postId: number) {

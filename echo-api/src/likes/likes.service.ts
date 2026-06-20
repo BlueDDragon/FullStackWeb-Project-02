@@ -49,7 +49,7 @@ export class LikesService {
 
     const totalPage = getTotalPage(total, limit);
 
-    return { likes: likes, page, limit, total, totalPage };
+    return { likes: likes, pagination: { page, limit, total, totalPage }};
   }
 
   async findByUser(userId: string, page: number = 1, limit: number = 10) {
@@ -64,7 +64,7 @@ export class LikesService {
 
     const totalPage = getTotalPage(total, limit);
 
-    return { likes: likes, page, limit, total, totalPage };
+    return { likes: likes, pagination: { page, limit, total, totalPage }};
   }
   
   ///
