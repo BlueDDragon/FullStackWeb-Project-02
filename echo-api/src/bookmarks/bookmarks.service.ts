@@ -14,11 +14,7 @@ import { getPagination, getTotalPage } from '../pagination/pagination';
 @Injectable()
 export class BookmarksService {
   constructor(private readonly prisma: PrismaService,
-    
-    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
-
-    @Inject(forwardRef(() => PostsService))
     private readonly postService: PostsService,
   ) {}
 

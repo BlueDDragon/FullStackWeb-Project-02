@@ -6,10 +6,7 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
 @Module({
-  imports: [
-    forwardRef(() => UsersModule),
-    forwardRef(() => PostsModule),
-  ],
+  imports: [UsersModule, PostsModule],
   controllers: [BookmarksController],
   providers: [BookmarksService, JwtStrategy],
   exports: [BookmarksService],
