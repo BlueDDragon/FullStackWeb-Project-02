@@ -4,16 +4,16 @@ import { HomePostContext } from "@/context/HomePostContext";
 import HomePost from "./HomePost";
 import HomePostList from "./HomePostList";
 import { useHomePostContextAction } from "@/hooks/contetxt/useHomePostContext";
-import { AuthMeResponse, PostFindAllResponse } from "@/types/ResponseData";
+import { AuthMeResponse, GetPostsResponse } from "@/types/ResponseData";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
 
 type HomeProps = {
     resAuthMe: AuthMeResponse;
-    resPostFindAll: PostFindAllResponse;
+    resGetPosts: GetPostsResponse;
 }
 
-export default function Home({ resAuthMe, resPostFindAll }: HomeProps) {
+export default function Home({ resAuthMe, resGetPosts }: HomeProps) {
     const { setAuthData } = useContext(AuthContext);
     const { postStorage, isPostEmpty, updatePostStorage } = useHomePostContextAction();
 
@@ -25,7 +25,7 @@ export default function Home({ resAuthMe, resPostFindAll }: HomeProps) {
         <div>
             <HomePostContext.Provider value={{ postStorage, isPostEmpty, updatePostStorage }}>
                 <HomePost/>
-                <HomePostList resPostFindAll={resPostFindAll}/>
+                <HomePostList resGetPosts={resGetPosts}/>
             </HomePostContext.Provider>
         </div>
     );

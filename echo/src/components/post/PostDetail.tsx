@@ -15,7 +15,7 @@ export default function PostDetail({ post, isFocus }: PostDetailProps) {
     const router = useRouter();
 
     const handlePostClick = useCallback(() => {
-        router.push(`/post/${post.id}`);
+        router.push(`/post/${post.rootPostId}`);
     }, []);
 
     return (
@@ -32,10 +32,8 @@ export default function PostDetail({ post, isFocus }: PostDetailProps) {
             <div className={styles.box_body}>
                 <div className={styles.box_header}>
                     <div className={styles.box_post}>
-                        {/* <p className={styles.nickname}>{post.nickname}</p> */}
-                        {/* <p className={styles.id}>@{post.userId}</p> */}
-                        <p className={styles.nickname}>익명</p>
-                        <p className={styles.id}>@___DDragon1231</p>
+                        <p className={styles.nickname}>{post.author.displayName}</p>
+                        <p className={styles.id}>@{post.author.username}</p>
                         <span> · </span>
                         <p className={styles.createAt}>{post.createdAt}</p>
                     </div>
@@ -43,6 +41,8 @@ export default function PostDetail({ post, isFocus }: PostDetailProps) {
                 </div>
                 <div className={styles.box_content}>
                     <p className={styles.content}>{post.content}</p>
+                    {post.images.length > 0 &&
+                    post.images.map((image, idx) => <Image key={idx} src={image.imgUrl} width={60} height={40} alt="image" unoptimized/>)}
                 </div>
                 <div className={styles.box_bottom}>
                     <button className={styles.comment}>💬 <span>0</span></button>

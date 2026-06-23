@@ -1,39 +1,43 @@
-import { PostFindAllResponse, PostDetailResponse, PostCreateResponse } from "@/types/ResponseData";
+import { CreatePostResponse, GetPostsResponse, GetPostThreadResponse } from "@/types/ResponseData";
 import { api } from "./fetchServer";
 
-export async function fetchPostCreate(state: string, content: string, userId: string, rootPostId?: number, parentPostId?: number) : Promise<PostCreateResponse> {
-    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/post`);
+type CreatePostDto = {
+    rootPostId?: number;
+    parentPostId?: number;
+    state: string;
+    content: string;
+}
+
+export async function fetchCreatePost(body: CreatePostDto) : Promise<CreatePostResponse> {
+    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
 
     const data = await api.post(apiURL, {
-        ...(rootPostId ? {rootPostId: rootPostId} : {}),
-        ...(parentPostId ? {parentPostId: parentPostId} : {}),
-        state: state,
-        content: content,
-        like: 0,
-        bookmark: 0,
-        userId: userId,
+        ...(body.rootPostId ? {rootPostId: body.rootPostId} : {}),
+        ...(body.parentPostId ? {parentPostId: body.parentPostId} : {}),
+        state: body.state,
+        content: body.content,
     });
     if (!data) throw new Error(`response is null`);
     
-    return data as PostCreateResponse;
+    return data as CreatePostResponse;
 }
 
-export async function fetchPostFindAll(page: number = 1, limit: number = 10) : Promise<PostFindAllResponse> {
-    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/post`);
+export async function fetchGetPosts(page: number = 1, limit: number = 10) : Promise<GetPostsResponse> {
+    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
     apiURL.searchParams.append(`page`, String(page));
     apiURL.searchParams.append(`limit`, String(limit));
 
     const data = await api.get(apiURL);
     if (!data) throw new Error(`response is null`);
     
-    return data as PostFindAllResponse;
+    return data as GetPostsResponse;
 }
 
-export async function fetchPostDetail(postid: number) : Promise<PostDetailResponse> {
-    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/post/detail/${postid}`);
+export async function fetchGetPostsThread(postId: number) : Promise<GetPostThreadResponse> {
+    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}/thread`);
 
     const data = await api.get(apiURL);
     if (!data) throw new Error(`response is null`);
     
-    return data as PostDetailResponse;
+    return data as GetPostThreadResponse;
 }

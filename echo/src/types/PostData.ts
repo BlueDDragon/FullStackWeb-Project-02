@@ -1,3 +1,5 @@
+import { UserData } from "./AuthData";
+
 export enum PostState {
     PUBLIC = "PUBLIC",
     PRIVATE = "PRIVATE",
@@ -12,11 +14,15 @@ export interface PostData {
     parentPostId: number;
     state: PostState;
     content: string;
-    like: number;
-    bookmark: number;
 
-    userId: string;
+    author: UserData;
 
     createdAt: string;
     updatedAt: string;
+
+    images: {
+        imgUrl: string;
+    }[];
+
+    children: PostData[];
 }

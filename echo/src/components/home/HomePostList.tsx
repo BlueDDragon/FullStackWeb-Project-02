@@ -3,24 +3,23 @@
 import mock_homepost from "@/mocks/mock_homepost.json"
 import { useContext } from "react";
 import { HomePostContext } from "@/context/HomePostContext";
-import { PostFindAllResponse } from "@/types/ResponseData";
+import { GetPostsResponse } from "@/types/ResponseData";
 import PostDetail from "../post/PostDetail";
 
 type HomePostProps = {
-    resPostFindAll: PostFindAllResponse;
+    resGetPosts: GetPostsResponse;
 }
 
-export default function HomePostList({ resPostFindAll }: HomePostProps) {
+export default function HomePostList({ resGetPosts }: HomePostProps) {
     // const temp_homepost = [...mock_homepost.posts];
     // const { postStorage, isPostEmpty } = useContext(HomePostContext);
 
-    const isPostEmpty = !(resPostFindAll?.posts.length > 0);
+    const isPostEmpty = !(resGetPosts?.posts.length > 0);
 
     return (
         <div>
             {!isPostEmpty && 
-            resPostFindAll?.posts.sort((a, b) => a.createdAt < b.createdAt? 1 : -1)
-                .map((post) => <PostDetail key={post.id} post={post} isFocus={true}/>)}
+            resGetPosts?.posts.map((post) => <PostDetail key={post.id} post={post} isFocus={true}/>)}
         </div>
     );
 }

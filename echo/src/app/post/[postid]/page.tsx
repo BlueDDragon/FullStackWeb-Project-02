@@ -1,17 +1,17 @@
 import Post from "@/components/post/Post";
-import { fetchPostDetail } from "@/utils/api/fetchPost";
+import { fetchGetPostsThread } from "@/utils/api/fetchPost";
 
-export default async function Page({ params }: { params: Promise<{ postid: string }>}) {
-    const { postid } = await params;
+export default async function Page({ params }: { params: Promise<{ postId: string }>}) {
+    const { postId } = await params;
 
     try {
-        const response = await fetchPostDetail(Number(postid));
+        const response = await fetchGetPostsThread(Number(postId));
         if (!response) throw new Error(`response is null`);
 
         return (
             <div>
                 <h1>게시글 상세 페이지</h1>
-                <Post response={response} postid={postid}/>
+                <Post response={response} postId={Number(postId)}/>
             </div>
         );
     } catch (error) {

@@ -1,8 +1,7 @@
 import { AuthContext } from "@/context/AuthContext";
 import { HomePostContext } from "@/context/HomePostContext";
 import { ModalContext } from "@/context/ModalContext";
-import { fetchPostCreate } from "@/utils/api/fetchPost";
-import { addPost } from "@/utils/service/postDataUtils";
+import { fetchCreatePost } from "@/utils/api/fetchPost";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useState } from "react";
 
@@ -21,10 +20,10 @@ export function usePostAction() {
             return;
         }
         
-        // addPost(content);
-        // updatePostStorage();
-        
-        const response = await fetchPostCreate("PUBLIC", content, "example00");
+        const response = await fetchCreatePost({
+            state: "PUBLIC",
+            content,
+        });
         if (response.post) router.refresh();
 
         setContent("");

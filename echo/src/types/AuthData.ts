@@ -1,8 +1,12 @@
 export interface AuthData {
     login: boolean;
-    
-    userId: string;
+    user: UserData;
+}
+
+export interface UserData {
+    id: string;
     username: string;
+    displayName: string;
     profileImageUrl: string;
     createdAt: string;
 }

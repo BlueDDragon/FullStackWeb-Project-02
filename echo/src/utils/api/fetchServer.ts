@@ -45,7 +45,7 @@ export async function fetchData<T>(url: URL, token: string, options?: RequestIni
         return data;
     }
     catch (error) {
-        console.error("fetchData error:", error);
+        console.error("fetch error:", error);
         return undefined;
     }
 }
