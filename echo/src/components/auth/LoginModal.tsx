@@ -1,7 +1,7 @@
 'use client';
 
 import { ModalContext } from "@/context/ModalContext";
-import styles from "./Modal.module.css";
+import styles from "../modal/Modal.module.css"
 import { useCallback, useContext } from "react";
 
 type LoginModalProps = {

@@ -4,22 +4,14 @@ import { HomePostContext } from "@/context/HomePostContext";
 import HomePost from "./HomePost";
 import HomePostList from "./HomePostList";
 import { useHomePostContextAction } from "@/hooks/contetxt/useHomePostContext";
-import { AuthMeResponse, GetPostsResponse } from "@/types/ResponseData";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "@/context/AuthContext";
+import { GetPostsResponse } from "@/types/ResponseData";
 
 type HomeProps = {
-    resAuthMe: AuthMeResponse;
     resGetPosts: GetPostsResponse;
 }
 
-export default function Home({ resAuthMe, resGetPosts }: HomeProps) {
-    const { setAuthData } = useContext(AuthContext);
+export default function Home({ resGetPosts }: HomeProps) {
     const { postStorage, isPostEmpty, updatePostStorage } = useHomePostContextAction();
-
-    useEffect(() => {
-        setAuthData(resAuthMe);
-    }, [resAuthMe]);
 
     return (
         <div>

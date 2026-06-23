@@ -45,6 +45,13 @@ export class UsersController {
   ///
   /// 정보 조회
   ///
+  @Get(':username/username')
+  @ApiOperation({ summary: "사용자 조회" })
+  getUser(
+    @Param('username') username: string) {
+      return this.usersService.findByUsername(username);
+  }
+
   @Get(':id/posts')
   @ApiOperation({ summary: "사용자 게시글 목록 조회" })
   getPosts(

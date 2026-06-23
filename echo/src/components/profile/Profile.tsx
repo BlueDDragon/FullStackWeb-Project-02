@@ -1,7 +1,22 @@
+'use client';
+
+import { useContext } from "react";
 import styles from "./Profile.module.css"
 import Image from "next/image";
+import { AuthContext } from "@/context/AuthContext";
 
-export default function Profile() {
+type ProfileProps = {
+    id: string;
+}
+
+export default function Profile({ id }: ProfileProps) {
+    const { auth } = useContext(AuthContext);
+    if (id === "0" && !auth?.login) {
+        return null;
+    }
+
+    const isLogin = (auth?.login && id === auth.user.username);
+
     return (
         <div className={styles.container}>
             <div className={styles.box_header}>
@@ -19,7 +34,7 @@ export default function Profile() {
                 <div className={styles.box_info_user}>
                     <p className={styles.user_name}>{`사용자 닉네임`}</p>
                     <p className={styles.user_id}>@{`사용자 아이디`}</p>
-                    <p className={styles.user_description}>{`사용자 프로필 설정`}</p>
+                    {isLogin && <p className={styles.user_description}>{`사용자 프로필 설정`}</p>}
                     <p className={styles.user_createdat}>{`가입일: 2020년 10월`}</p>
                 </div>
                 <div className={styles.box_info_follow}>

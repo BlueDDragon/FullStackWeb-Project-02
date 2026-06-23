@@ -8,5 +8,6 @@ export interface UserData {
     username: string;
     displayName: string;
     profileImageUrl: string;
+    headerImageUrl: string;
     createdAt: string;
 }

@@ -2,35 +2,19 @@
 
 import { AuthData } from "@/types/AuthData";
 import { AuthMeResponse } from "@/types/ResponseData";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 type AuthContextType = {
     auth: AuthData | undefined;
-    setAuthData: (res: AuthMeResponse) => void;
 };
 
 export const AuthContext = createContext<AuthContextType>( {
-    auth: undefined,
-    setAuthData: (res: AuthMeResponse) => {},
+    auth: undefined
 });
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [auth, setAuth] = useState<AuthData | undefined>();
-
-    const setAuthData = (res: AuthMeResponse) => {
-        if (!res) return;
-        
-        setAuth({
-            login: res.login,
-            userId: res.user.userId,
-            username: res.user.username,
-            profileImageUrl: res.user.profileImageUrl,
-            createdAt: res.user.createdAt,
-        });
-    };
-
+export default function AuthProvider({ children, resAuthMe }: { children: React.ReactNode, resAuthMe: AuthMeResponse }) {
     return (
-        <AuthContext.Provider value={{ auth, setAuthData }}>
+        <AuthContext.Provider value={{ auth: resAuthMe }}>
             {children}
         </AuthContext.Provider>
     );

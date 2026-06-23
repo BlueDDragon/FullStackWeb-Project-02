@@ -9,7 +9,7 @@ type CreatePostDto = {
 }
 
 export async function fetchCreatePost(body: CreatePostDto) : Promise<CreatePostResponse> {
-    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
+    const apiURL = new URL(`${process.env.API_URL}/posts`);
 
     const data = await api.post(apiURL, {
         ...(body.rootPostId ? {rootPostId: body.rootPostId} : {}),
@@ -23,7 +23,7 @@ export async function fetchCreatePost(body: CreatePostDto) : Promise<CreatePostR
 }
 
 export async function fetchGetPosts(page: number = 1, limit: number = 10) : Promise<GetPostsResponse> {
-    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
+    const apiURL = new URL(`${process.env.API_URL}/posts`);
     apiURL.searchParams.append(`page`, String(page));
     apiURL.searchParams.append(`limit`, String(limit));
 
@@ -34,7 +34,7 @@ export async function fetchGetPosts(page: number = 1, limit: number = 10) : Prom
 }
 
 export async function fetchGetPostsThread(postId: number) : Promise<GetPostThreadResponse> {
-    const apiURL = new URL(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}/thread`);
+    const apiURL = new URL(`${process.env.API_URL}/posts/${postId}/thread`);
 
     const data = await api.get(apiURL);
     if (!data) throw new Error(`response is null`);

@@ -1,3 +1,4 @@
+import { UserData } from "./AuthData";
 import { PostData, PostState } from "./PostData";
 
 export interface CreatePostResponse {
@@ -22,20 +23,10 @@ export interface GetPostThreadResponse {
 export interface AuthLoginResponse {
     login: boolean;
     accessToken: string;
-    user: {
-        userId: string;
-        username: string;
-        profileImageUrl: string;
-        createdAt: string;
-    }
+    user: UserData;
 }
 
 export interface AuthMeResponse {
     login: boolean;
-    user: {
-        userId: string;
-        username: string;
-        profileImageUrl: string;
-        createdAt: string;
-    }
+    user: UserData;
 }

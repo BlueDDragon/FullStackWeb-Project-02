@@ -3,10 +3,14 @@
 import styles from "./Header.module.css"
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useContext, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { AuthContext } from "@/context/AuthContext";
+import { ModalContext } from "@/context/ModalContext";
 
 export default function Header() {
+    const router = useRouter();
+
     const pathName = usePathname().split('/');
     const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
@@ -15,6 +19,17 @@ export default function Header() {
     const isLinkBookmark = pathName[2] === "bookmark";
     const isLinkChat = pathName[2] === "chat";
     const isLinkSetting = pathName[1] === "setting";
+
+    const { auth } = useContext(AuthContext);
+    const username = auth?.login ? auth.user.username : "0";
+
+    const { openLoginModal } = useContext(ModalContext);
+    const onClickLink = (href: string) => {
+        if (!auth?.login)
+            openLoginModal();
+        else
+            router.push(href);
+    }
 
     return (
         <div className={`${styles.container} ${isHeaderOpen ? styles.open : styles.close}`}>
@@ -27,22 +42,22 @@ export default function Header() {
                 <Image src={`/images/icon_home_${isLinkHome? "open" : "close"}.png`} width={30} height={30} alt="home"/>
                 <p>홈</p>
             </Link>
-            <Link className={styles.link_profile} href={`/profile/0`}>
+            <button className={styles.link_profile} onClick={() => onClickLink(`/${username}/profile`)}>
                 <Image src={`/images/icon_profile_${isLinkProfile? "open" : "close"}.png`} width={30} height={30} alt="profile"/>
                 <p>프로필</p>
-            </Link>
-            <Link className={styles.link_bookmark} href={`/0/bookmark`}>
+            </button>
+            <button className={styles.link_bookmark} onClick={() => onClickLink(`/${username}/bookmark`)}>
                 <Image src={`/images/icon_bookmark_${isLinkBookmark? "open" : "close"}.png`} width={30} height={30} alt="bookmark"/>
                 <p>북마크</p>
-            </Link>
-            <Link className={styles.link_chat} href={`/0/chat`}>
+            </button>
+            <button className={styles.link_chat} onClick={() => onClickLink(`/${username}/chat`)}>
                 <Image src={`/images/icon_chat_${isLinkChat? "open" : "close"}.png`} width={30} height={30} alt="chat"/>
                 <p>채팅</p>
-            </Link>
-            <Link className={styles.link_setting} href={`/setting`}>
+            </button>
+            <button className={styles.link_setting} onClick={() => onClickLink(`/setting`)}>
                 <Image src={`/images/icon_setting_${isLinkSetting? "open" : "close"}.png`} width={30} height={30} alt="setting"/>
                 <p>설정</p>
-            </Link>
+            </button>
             
             {isHeaderOpen ? 
             <button className={styles.btn_collapse} onClick={() => setIsHeaderOpen(false)}>

@@ -1,9 +1,8 @@
 'use client';
 
-import LoginModal from "@/components/modal/LoginModal";
 import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
-import RegisterModal from "@/components/modal/RegisterModal";
-import { PostStorage } from "@/types/StorageData";
+import LoginModal from "@/components/auth/LoginModal";
+import RegisterModal from "@/components/auth/RegisterModal";
 import { createContext, useCallback, useState } from "react";
 
 type ModalContextType = {
